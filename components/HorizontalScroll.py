@@ -1,5 +1,5 @@
 import pygame
-from pynput.mouse import Listener
+from pygame import gfxdraw
 
 class HorizontalScroll:
     """Button object for pygame GUI
@@ -37,7 +37,7 @@ class HorizontalScroll:
         self.min = 0
 
         self.draw_bar = False
-        self.bar_rect = pygame.Rect(self.rect.x, self.rect.y + self.rect.h - 5, 0, 5)
+        self.bar_rect = pygame.Rect(self.rect.x, self.rect.y + self.rect.h - 6, 0, 6)
         self.move_of_bar = 0
         self.bar_color = (59, 59, 59)
         self.bar_clicked = False
@@ -55,7 +55,11 @@ class HorizontalScroll:
             item.render(scroll, self.move)
         screen.blit(scroll, (self.rect.x, self.rect.y))
         if self.draw_bar:
-            pygame.draw.line(screen, self.bar_color, (self.bar_rect.x, self.bar_rect.y), (self.bar_rect.x + self.bar_rect.w, self.bar_rect.y), 3)
+            pygame.draw.line(screen, self.bar_color, (self.bar_rect.x, self.bar_rect.y), (self.bar_rect.x + self.bar_rect.w, self.bar_rect.y), 5)
+            gfxdraw.filled_circle(screen, self.bar_rect.x, self.bar_rect.y, 2, self.bar_color)
+            gfxdraw.aacircle(screen, self.bar_rect.x, self.bar_rect.y, 2, self.bar_color)
+            gfxdraw.filled_circle(screen, self.bar_rect.x + self.bar_rect.w, self.bar_rect.y, 2, self.bar_color)
+            gfxdraw.aacircle(screen, self.bar_rect.x + self.bar_rect.w, self.bar_rect.y, 2, self.bar_color)
 
     def update(self, items):
         self.items = items

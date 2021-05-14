@@ -1,4 +1,5 @@
 import pygame
+from pygame import gfxdraw
 
 from components import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip
 
@@ -99,6 +100,19 @@ class SelectAgentsScene(Scene):
         self.starting_order_radio_gossip_label = self.font2.render("Gossip", True, (255, 255, 255))
         self.starting_order_radio_gossip = RadioButton((215 + 12, 261 + 12), active=False)
 
+        self.events_file_name_label = self.font2.render("Events File Name:", True, (255, 255, 255))
+        self.events_file_name_input = InputBox((162, 326), w=236, h=27, text="example.event")
+        self.results_file_name_label = self.font2.render("Results File Name:", True, (255, 255, 255))
+        self.results_file_name_input = InputBox((162, 365), w=236, h=27, text="example.res")
+        self.benefit_cooperation_label = self.font2.render("Benefit of Cooperation:", True, (255, 255, 255))
+        self.benefit_cooperation_input = InputBox((607, 326), w=101, h=27, text="10")
+        self.cost_cooperation_label = self.font2.render("Cost of Cooperation:", True, (255, 255, 255))
+        self.cost_cooperation_input = InputBox((585, 365), w=101, h=27, text="10")
+        self.start_time_label = self.font2.render("Start Time:", True, (255, 255, 255))
+        self.start_time_input = InputBox((833, 365), w=101, h=27, text="10")
+
+        self.evolution_type_dropdown = Dropdown("Evolution Type", w=157, pos=(777, 326), selections=selection_list)
+
     def render(self, screen):
         """Renders the radio buttons for tournament selection, labels for description, input boxes to get the values,
                 and the button"""
@@ -122,6 +136,12 @@ class SelectAgentsScene(Scene):
 
         self.scroll.render(screen)
 
+        pygame.draw.line(screen, (251, 164, 98), (16, 201), (934, 201), 5)
+        gfxdraw.filled_circle(screen, 16, 201, 2, (251, 164, 98))
+        gfxdraw.aacircle(screen, 16, 201, 2, (251, 164, 98))
+        gfxdraw.filled_circle(screen, 934, 201, 2, (251, 164, 98))
+        gfxdraw.aacircle(screen, 934, 201, 2, (251, 164, 98))
+
         screen.blit(self.conductor_label, (16, 222))
         screen.blit(self.number_of_conductors_label, (275, 225))
         self.number_of_conductors_input.render(screen)
@@ -138,9 +158,33 @@ class SelectAgentsScene(Scene):
         self.starting_order_radio_gossip.render(screen)
         screen.blit(self.starting_order_radio_gossip_label, (243, 263))
 
+        pygame.draw.line(screen, (251, 164, 98), (16, 306), (934, 306), 5)
+        gfxdraw.filled_circle(screen, 16, 306, 2, (251, 164, 98))
+        gfxdraw.aacircle(screen, 16, 306, 2, (251, 164, 98))
+        gfxdraw.filled_circle(screen, 934, 306, 2, (251, 164, 98))
+        gfxdraw.aacircle(screen, 934, 306, 2, (251, 164, 98))
+
+        screen.blit(self.events_file_name_label, (16, 330))
+        self.events_file_name_input.render(screen)
+        screen.blit(self.results_file_name_label, (16, 369))
+        self.results_file_name_input.render(screen)
+        screen.blit(self.benefit_cooperation_label, (425, 330))
+        self.benefit_cooperation_input.render(screen)
+        screen.blit(self.cost_cooperation_label, (425, 369))
+        self.cost_cooperation_input.render(screen)
+        screen.blit(self.start_time_label, (744, 369))
+        self.start_time_input.render(screen)
+
+        pygame.draw.line(screen, (251, 164, 98), (16, 411), (934, 411), 5)
+        gfxdraw.filled_circle(screen, 16, 411, 2, (251, 164, 98))
+        gfxdraw.aacircle(screen, 16, 411, 2, (251, 164, 98))
+        gfxdraw.filled_circle(screen, 934, 411, 2, (251, 164, 98))
+        gfxdraw.aacircle(screen, 934, 411, 2, (251, 164, 98))
+
         self.player_dropdown.render(screen)
         self.discrimination_type_dropdown.render(screen)
         self.discrimination_threshold_dropdown.render(screen)
+        self.evolution_type_dropdown.render(screen)
         self.gossip_type_dropdown.render(screen)
 
     def update(self):
@@ -160,6 +204,10 @@ class SelectAgentsScene(Scene):
         Scene.handle_events(self, events)
 
         for event in events:
+            self.player_dropdown.handle_events(event)
             self.discrimination_type_dropdown.handle_events(event)
+            self.discrimination_threshold_dropdown.handle_events(event)
+            self.evolution_type_dropdown.handle_events(event)
+            self.gossip_type_dropdown.handle_events(event)
             if i := self.scroll.handle_events(event):
                 self.agents.pop(i - 1)
