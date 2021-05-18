@@ -6,7 +6,7 @@ import pygame
 
 from components.SceneManager import SceneManager
 
-os.environ['SDL_VIDEO_WINDOW_POS'] = "2450,400"
+os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
 
 
 class Screen:

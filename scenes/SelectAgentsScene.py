@@ -70,11 +70,13 @@ class SelectAgentsScene(Scene):
         self.number_of_players_label = self.font2.render("Number of Players:", True, (255, 255, 255))
         self.number_of_players_input = InputBox((563, 96), w=101, h=27, text="1000")
 
+        self.self_advertisement = True
         self.self_advertisement_radio_label = self.font2.render("Self Advertisement:", True, (255, 255, 255))
         self.self_advertisement_radio_yes_label = self.font2.render("Yes", True, (255, 255, 255))
-        self.self_advertisement_radio_yes = RadioButton((823 + 12, 56 + 12), active=True)
+        self.self_advertisement_radio_yes = RadioButton((823 + 12, 56 + 12), on=True)
         self.self_advertisement_radio_no_label = self.font2.render("No", True, (255, 255, 255))
-        self.self_advertisement_radio_no = RadioButton((884 + 12, 56 + 12), active=False)
+        self.self_advertisement_radio_no = RadioButton((884 + 12, 56 + 12), on=False)
+        self.self_advertisement_radio_no.bind(self.self_advertisement_radio_yes, self.change_self_advertisement)
 
         self.add_button = Button(w=75, pos=(859, 92))
 
@@ -94,11 +96,13 @@ class SelectAgentsScene(Scene):
         self.gossip_encounters_label = self.font2.render("Total Giving Encounters:", True, (255, 255, 255))
         self.gossip_encounters_input = InputBox((833, 260), w=101, h=27, text="1000")
 
+        self.starting_order = True
         self.starting_order_radio_label = self.font2.render("Starting Order:", True, (255, 255, 255))
         self.starting_order_radio_giving_label = self.font2.render("Giving", True, (255, 255, 255))
-        self.starting_order_radio_giving = RadioButton((131 + 12, 261 + 12), active=True)
+        self.starting_order_radio_giving = RadioButton((131 + 12, 261 + 12), on=True)
         self.starting_order_radio_gossip_label = self.font2.render("Gossip", True, (255, 255, 255))
-        self.starting_order_radio_gossip = RadioButton((215 + 12, 261 + 12), active=False)
+        self.starting_order_radio_gossip = RadioButton((215 + 12, 261 + 12), on=False)
+        self.starting_order_radio_gossip.bind(self.starting_order_radio_giving, self.change_starting_order)
 
         self.events_file_name_label = self.font2.render("Events File Name:", True, (255, 255, 255))
         self.events_file_name_input = InputBox((162, 326), w=236, h=27, text="example.event")
@@ -112,6 +116,27 @@ class SelectAgentsScene(Scene):
         self.start_time_input = InputBox((833, 365), w=101, h=27, text="10")
 
         self.evolution_type_dropdown = Dropdown("Evolution Type", w=157, pos=(777, 326), selections=selection_list)
+
+        self.generation_range_label = self.font.render("Generation Range", True, (255, 255, 255))
+        self.min_generation_range_label = self.font2.render("Minimum Generation Range:", True, (255, 255, 255))
+        self.min_generation_range_input = InputBox((246, 468), w=101, h=27, text="-5")
+        self.max_generation_range_label = self.font2.render("Maximum Generation Range:", True, (255, 255, 255))
+        self.max_generation_range_input = InputBox((246, 507), w=101, h=27, text="5")
+
+        self.image_score_range_label = self.font.render("Image Score Range", True, (255, 255, 255))
+        self.min_image_score_range_label = self.font2.render("Minimum Image Score:", True, (255, 255, 255))
+        self.min_image_score_range_input = InputBox((680, 468), w=101, h=27, text="-5")
+        self.max_image_score_range_label = self.font2.render("Maximum Image Score:", True, (255, 255, 255))
+        self.max_image_score_range_input = InputBox((680, 507), w=101, h=27, text="5")
+
+        self.start_button = Button(w=80, pos=(854, 499))
+
+    def change_starting_order(self):
+        print("a")
+        self.starting_order = not self.starting_order
+
+    def change_self_advertisement(self):
+        self.self_advertisement = not self.self_advertisement
 
     def render(self, screen):
         """Renders the radio buttons for tournament selection, labels for description, input boxes to get the values,
@@ -181,6 +206,24 @@ class SelectAgentsScene(Scene):
         gfxdraw.filled_circle(screen, 934, 411, 2, (251, 164, 98))
         gfxdraw.aacircle(screen, 934, 411, 2, (251, 164, 98))
 
+        screen.blit(self.generation_range_label, (16, 431))
+        screen.blit(self.min_generation_range_label, (16, 472))
+        self.min_generation_range_input.render(screen)
+        screen.blit(self.max_generation_range_label, (16, 511))
+        self.max_generation_range_input.render(screen)
+
+        pygame.draw.line(screen, (251, 164, 98), (421, 412), (421, 534), 5)
+        gfxdraw.filled_circle(screen, 421, 534, 2, (251, 164, 98))
+        gfxdraw.aacircle(screen, 421, 534, 2, (251, 164, 98))
+
+        screen.blit(self.image_score_range_label, (493, 431))
+        screen.blit(self.min_image_score_range_label, (493, 472))
+        self.min_image_score_range_input.render(screen)
+        screen.blit(self.max_image_score_range_label, (493, 511))
+        self.max_image_score_range_input.render(screen)
+
+        self.start_button.render(screen, "Start")
+
         self.player_dropdown.render(screen)
         self.discrimination_type_dropdown.render(screen)
         self.discrimination_threshold_dropdown.render(screen)
@@ -202,6 +245,7 @@ class SelectAgentsScene(Scene):
     def handle_events(self, events):
         """Handles all the objects events, and when the button is pressed will move to the next scene"""
         Scene.handle_events(self, events)
+        print(self.self_advertisement)
 
         for event in events:
             self.player_dropdown.handle_events(event)
@@ -209,5 +253,27 @@ class SelectAgentsScene(Scene):
             self.discrimination_threshold_dropdown.handle_events(event)
             self.evolution_type_dropdown.handle_events(event)
             self.gossip_type_dropdown.handle_events(event)
+            self.gossip_weight_input.handle_events(event)
+            self.trust_criteria_input.handle_events(event)
+            self.number_of_players_input.handle_events(event)
+            self.number_of_conductors_input.handle_events(event)
+            self.number_of_rounds_input.handle_events(event)
+            self.giving_encounters_input.handle_events(event)
+            self.gossip_encounters_input.handle_events(event)
+            self.events_file_name_input.handle_events(event)
+            self.results_file_name_input.handle_events(event)
+            self.benefit_cooperation_input.handle_events(event)
+            self.cost_cooperation_input.handle_events(event)
+            self.start_time_input.handle_events(event)
+            self.min_image_score_range_input.handle_events(event)
+            self.min_generation_range_input.handle_events(event)
+            self.max_image_score_range_input.handle_events(event)
+            self.max_generation_range_input.handle_events(event)
+            self.add_button.handle_events(event)
+            self.start_button.handle_events(event)
+            self.self_advertisement_radio_no.handle_events(event)
+            self.self_advertisement_radio_yes.handle_events(event)
+            self.starting_order_radio_gossip.handle_events(event)
+            self.starting_order_radio_giving.handle_events(event)
             if i := self.scroll.handle_events(event):
                 self.agents.pop(i - 1)

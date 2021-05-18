@@ -119,24 +119,24 @@ class PlayTournamentScene(Scene):
         self.watching_agents = None
 
         if self.tournament_manager.tournament.__class__.__name__ == "DirectReciprocity":
-            self.dr_rb = RadioButton(pos=(20, 62), active=True, disabled=True)
+            self.dr_rb = RadioButton(pos=(20, 62), on=True, disabled=True)
             self.ir_rb = RadioButton(pos=(180, 62), disabled=True)
         else:
             self.dr_rb = RadioButton(pos=(20, 62), disabled=True)
-            self.ir_rb = RadioButton(pos=(180, 62), active=True, disabled=True)
+            self.ir_rb = RadioButton(pos=(180, 62), on=True, disabled=True)
 
         if self.tournament_manager.tournament.choose_opponent:
             self.false_rb = RadioButton(pos=(360, 62), disabled=True)
-            self.true_rb = RadioButton(pos=(440, 62), active=True, disabled=True)
+            self.true_rb = RadioButton(pos=(440, 62), on=True, disabled=True)
         else:
-            self.false_rb = RadioButton(pos=(360, 62), active=True, disabled=True)
+            self.false_rb = RadioButton(pos=(360, 62), on=True, disabled=True)
             self.true_rb = RadioButton(pos=(440, 62), disabled=True)
 
         if self.tournament_manager.tournament.selection.__class__.__name__ == "Selection2":
             self.selection1_rb = RadioButton(pos=(185, 100), disabled=True)
-            self.selection2_rb = RadioButton(pos=(235, 100), active=True, disabled=True)
+            self.selection2_rb = RadioButton(pos=(235, 100), on=True, disabled=True)
         else:
-            self.selection1_rb = RadioButton(pos=(185, 100), active=True, disabled=True)
+            self.selection1_rb = RadioButton(pos=(185, 100), on=True, disabled=True)
             self.selection2_rb = RadioButton(pos=(235, 100), disabled=True)
 
         self.start_stop_button = Button(pos=(520, 45), w=75, h=30)

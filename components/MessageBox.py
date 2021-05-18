@@ -52,7 +52,7 @@ class MessageBox:
         self.show = False
         self.highlight_yes = False
         self.highlight_no = False
-        self.ask_again_rb = RadioButton(pos=(self.rect.x + 180, self.rect.y + self.rect.h - 25), go_back=True)
+        self.ask_again_rb = RadioButton(pos=(self.rect.x + 180, self.rect.y + self.rect.h - 25), self_unactivate=True)
         self.ask_again = True
 
     def render(self, screen, question):
@@ -129,7 +129,7 @@ class MessageBox:
                 self.highlight_yes = True
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.answer = "yes"
-                    if self.ask_again_rb.active:
+                    if self.ask_again_rb.on:
                         self.ask_again = False
             else:
                 self.highlight_yes = False
