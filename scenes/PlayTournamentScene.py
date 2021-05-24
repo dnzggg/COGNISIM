@@ -90,7 +90,7 @@ class PlayTournamentScene(Scene):
     plot_graph(name, xs, ys, x_label, y_label, title)
         Creates a Graph object, adds it to the list of graphs
     """
-    def __init__(self, tournament_manager):
+    def __init__(self):
         """
         Parameters
         ----------
@@ -98,14 +98,13 @@ class PlayTournamentScene(Scene):
             TournamentManager that takes control of switching between tournaments
         """
         Scene.__init__(self)
-        self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
-
-        self.tournament_manager = tournament_manager
+        self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
+        self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
 
         self.running = False
         self.was_running = False
         self.new_generation = False
-        self.run = self.tournament_manager.tournament.start()
+        # self.run = self.tournament_manager.tournament.start()
 
         self.UPDATE = pygame.USEREVENT + 1
         self.speed = 99
@@ -118,26 +117,26 @@ class PlayTournamentScene(Scene):
         self.gossiping_agents = None
         self.watching_agents = None
 
-        if self.tournament_manager.tournament.__class__.__name__ == "DirectReciprocity":
-            self.dr_rb = RadioButton(pos=(20, 62), on=True, disabled=True)
-            self.ir_rb = RadioButton(pos=(180, 62), disabled=True)
-        else:
-            self.dr_rb = RadioButton(pos=(20, 62), disabled=True)
-            self.ir_rb = RadioButton(pos=(180, 62), on=True, disabled=True)
-
-        if self.tournament_manager.tournament.choose_opponent:
-            self.false_rb = RadioButton(pos=(360, 62), disabled=True)
-            self.true_rb = RadioButton(pos=(440, 62), on=True, disabled=True)
-        else:
-            self.false_rb = RadioButton(pos=(360, 62), on=True, disabled=True)
-            self.true_rb = RadioButton(pos=(440, 62), disabled=True)
-
-        if self.tournament_manager.tournament.selection.__class__.__name__ == "Selection2":
-            self.selection1_rb = RadioButton(pos=(185, 100), disabled=True)
-            self.selection2_rb = RadioButton(pos=(235, 100), on=True, disabled=True)
-        else:
-            self.selection1_rb = RadioButton(pos=(185, 100), on=True, disabled=True)
-            self.selection2_rb = RadioButton(pos=(235, 100), disabled=True)
+        # if self.tournament_manager.tournament.__class__.__name__ == "DirectReciprocity":
+        #     self.dr_rb = RadioButton(pos=(20, 62), on=True, disabled=True)
+        #     self.ir_rb = RadioButton(pos=(180, 62), disabled=True)
+        # else:
+        #     self.dr_rb = RadioButton(pos=(20, 62), disabled=True)
+        #     self.ir_rb = RadioButton(pos=(180, 62), on=True, disabled=True)
+        #
+        # if self.tournament_manager.tournament.choose_opponent:
+        #     self.false_rb = RadioButton(pos=(360, 62), disabled=True)
+        #     self.true_rb = RadioButton(pos=(440, 62), on=True, disabled=True)
+        # else:
+        #     self.false_rb = RadioButton(pos=(360, 62), on=True, disabled=True)
+        #     self.true_rb = RadioButton(pos=(440, 62), disabled=True)
+        #
+        # if self.tournament_manager.tournament.selection.__class__.__name__ == "Selection2":
+        #     self.selection1_rb = RadioButton(pos=(185, 100), disabled=True)
+        #     self.selection2_rb = RadioButton(pos=(235, 100), on=True, disabled=True)
+        # else:
+        #     self.selection1_rb = RadioButton(pos=(185, 100), on=True, disabled=True)
+        #     self.selection2_rb = RadioButton(pos=(235, 100), disabled=True)
 
         self.start_stop_button = Button(pos=(520, 45), w=75, h=30)
         self.next_step_button = Button(pos=(600, 45), w=70, h=30)
@@ -237,10 +236,10 @@ class PlayTournamentScene(Scene):
         """Updates the blobs status, messagebox, and slider"""
         self.speed_slider.update()
 
-        self.agents = self.tournament_manager.tournament.agents_to_play
-        self.playing_agents = self.tournament_manager.tournament.get_agents_playing()
-        self.watching_agents = self.tournament_manager.tournament.get_watching_agents()
-        self.gossiping_agents = self.tournament_manager.tournament.get_gossiping_agents()
+        # self.agents = self.tournament_manager.tournament.agents_to_play
+        # self.playing_agents = self.tournament_manager.tournament.get_agents_playing()
+        # self.watching_agents = self.tournament_manager.tournament.get_watching_agents()
+        # self.gossiping_agents = self.tournament_manager.tournament.get_gossiping_agents()
 
         if self.new_generation:
             if self.message_box.ask_again:

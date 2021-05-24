@@ -52,7 +52,7 @@ class MessageBox:
         self.show = False
         self.highlight_yes = False
         self.highlight_no = False
-        self.ask_again_rb = RadioButton(pos=(self.rect.x + 180, self.rect.y + self.rect.h - 25), self_unactivate=True)
+        self.ask_again_rb = RadioButton(pos=(self.rect.x + 180, self.rect.y + self.rect.h - 25), self_deactivate=True)
         self.ask_again = True
 
     def render(self, screen, question):

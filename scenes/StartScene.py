@@ -1,6 +1,6 @@
 import pygame
 
-from components import Background, Button, Scene, Dropdown, Chip, HorizontalScroll
+from components import Background, Button, Scene
 from .SelectAgentsScene import SelectAgentsScene
 
 
@@ -60,7 +60,5 @@ class StartScene(Scene):
             self.button.handle_events(event)
             if event.type == pygame.KEYDOWN:
                 self.manager.go_to(SelectAgentsScene())
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    if self.button.clicked(event):
-                        self.manager.go_to(SelectAgentsScene())
+            if self.button.handle_events(event):
+                self.manager.go_to(SelectAgentsScene())

@@ -2,6 +2,7 @@ import pygame
 from pygame import gfxdraw
 
 from components import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip
+from .PlayTournamentScene import PlayTournamentScene
 
 
 class SelectAgentsScene(Scene):
@@ -80,8 +81,7 @@ class SelectAgentsScene(Scene):
 
         self.add_button = Button(w=75, pos=(859, 92))
 
-        self.agents = ["Defector 100", "Cooperator 200", "Stern 50", "Defector 100", "Cooperator 200", "Stern 50",
-                       "Defector 100", "Cooperator 200", "Stern 50", "Defector 100", "Cooperator 200", "Stern 50"]
+        self.agents = []
         self.agents2 = []
         self.chips = []
         self.scroll = HorizontalScroll(items=self.chips, pos=(16, 139))
@@ -132,7 +132,6 @@ class SelectAgentsScene(Scene):
         self.start_button = Button(w=80, pos=(854, 499))
 
     def change_starting_order(self):
-        print("a")
         self.starting_order = not self.starting_order
 
     def change_self_advertisement(self):
@@ -245,7 +244,6 @@ class SelectAgentsScene(Scene):
     def handle_events(self, events):
         """Handles all the objects events, and when the button is pressed will move to the next scene"""
         Scene.handle_events(self, events)
-        print(self.self_advertisement)
 
         for event in events:
             self.player_dropdown.handle_events(event)
@@ -253,6 +251,7 @@ class SelectAgentsScene(Scene):
             self.discrimination_threshold_dropdown.handle_events(event)
             self.evolution_type_dropdown.handle_events(event)
             self.gossip_type_dropdown.handle_events(event)
+
             self.gossip_weight_input.handle_events(event)
             self.trust_criteria_input.handle_events(event)
             self.number_of_players_input.handle_events(event)
@@ -269,8 +268,12 @@ class SelectAgentsScene(Scene):
             self.min_generation_range_input.handle_events(event)
             self.max_image_score_range_input.handle_events(event)
             self.max_generation_range_input.handle_events(event)
-            self.add_button.handle_events(event)
-            self.start_button.handle_events(event)
+
+            if self.add_button.handle_events(event):
+                self.agents.append("Cooperate 100")
+            if self.start_button.handle_events(event):
+                self.manager.go_to(PlayTournamentScene())
+
             self.self_advertisement_radio_no.handle_events(event)
             self.self_advertisement_radio_yes.handle_events(event)
             self.starting_order_radio_gossip.handle_events(event)
