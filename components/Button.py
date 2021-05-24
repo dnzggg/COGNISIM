@@ -52,7 +52,7 @@ class Button:
         # rect = pygame.Rect(0, 0, self.rect.w, self.rect.h)
         # pygame.draw.rect(surface, self.color, rect)
         # screen.blit(surface, (self.rect.x, self.rect.y))
-        pygame.draw.rect(screen, self.color, self.rect, border_radius=3)
+        pygame.draw.rect(screen, self.color, self.rect, border_radius=7)
 
         font = pygame.font.Font("Images/Montserrat-Regular.ttf", self.font_size)
         if self.rect.w - 8 > font.size(str(text))[0]:

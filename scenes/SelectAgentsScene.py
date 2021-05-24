@@ -1,7 +1,7 @@
 import pygame
 from pygame import gfxdraw
 
-from components import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip
+from components import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem
 from .PlayTournamentScene import PlayTournamentScene
 
 
@@ -56,30 +56,32 @@ class SelectAgentsScene(Scene):
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
 
+        self.item = DropdownItem((100, 100), 1, "12345678")
+
         self.player_label = self.font.render("Player Agent", True, (255, 255, 255))
         selection_list = ["Selection 1", "Selection 2", "Selection 3", "Selection 4", "Selection 5", "Selection 6",
                           "Selection 7", "Selection 8"]
-        self.player_dropdown = Dropdown("Player Type", w=128, pos=(228, 16), selections=selection_list)
-        self.discrimination_type_dropdown = Dropdown("Discrimination Type", w=193, pos=(433, 16), selections=selection_list)
-        self.discrimination_threshold_dropdown = Dropdown("Discrimination Threshold", w=231, pos=(703, 16), selections=selection_list)
-        self.gossip_type_dropdown = Dropdown("Gossip Type", w=131, pos=(16, 54), selections=selection_list)
+        self.gossip_type_dropdown = Dropdown("Gossip Type", w=131, pos=(177, 16), selections=selection_list)
+        self.discrimination_type_dropdown = Dropdown("Discrimination Type", w=193, pos=(334, 16), selections=selection_list)
 
+        self.discrimination_threshold_label = self.font2.render("Discrimination Threshold (-5 to 5.5):", True, (255, 255, 255))
+        self.discrimination_threshold_input = InputBox((833, 16), w=101, h=27, text="0.543")
         self.gossip_weight_label = self.font2.render("Gossip Weight (0 to 1):", True, (255, 255, 255))
-        self.gossip_weight_input = InputBox((448, 54), w=101, h=27, text="0.543")
+        self.gossip_weight_input = InputBox((196, 55), w=101, h=27, text="0.543")
         self.trust_criteria_label = self.font2.render("Trust Criteria (0 to 1):", True, (255, 255, 255))
-        self.trust_criteria_input = InputBox((183, 96), w=101, h=27, text="0.543")
+        self.trust_criteria_input = InputBox((521, 55), w=101, h=27, text="0.543")
         self.number_of_players_label = self.font2.render("Number of Players:", True, (255, 255, 255))
-        self.number_of_players_input = InputBox((563, 96), w=101, h=27, text="1000")
+        self.number_of_players_input = InputBox((833, 55), w=101, h=27, text="1000")
 
         self.self_advertisement = True
         self.self_advertisement_radio_label = self.font2.render("Self Advertisement:", True, (255, 255, 255))
         self.self_advertisement_radio_yes_label = self.font2.render("Yes", True, (255, 255, 255))
-        self.self_advertisement_radio_yes = RadioButton((823 + 12, 56 + 12), on=True)
+        self.self_advertisement_radio_yes = RadioButton((170 + 12, 100 + 12), on=True)
         self.self_advertisement_radio_no_label = self.font2.render("No", True, (255, 255, 255))
-        self.self_advertisement_radio_no = RadioButton((884 + 12, 56 + 12), on=False)
+        self.self_advertisement_radio_no = RadioButton((231 + 12, 100 + 12), on=False)
         self.self_advertisement_radio_no.bind(self.self_advertisement_radio_yes, self.change_self_advertisement)
 
-        self.add_button = Button(w=75, pos=(859, 92))
+        self.add_button = Button(w=75, pos=(859, 92), center=True)
 
         self.agents = []
         self.agents2 = []
@@ -129,7 +131,7 @@ class SelectAgentsScene(Scene):
         self.max_image_score_range_label = self.font2.render("Maximum Image Score:", True, (255, 255, 255))
         self.max_image_score_range_input = InputBox((680, 507), w=101, h=27, text="5")
 
-        self.start_button = Button(w=80, pos=(854, 499))
+        self.start_button = Button(w=80, pos=(854, 499), center=True)
 
     def change_starting_order(self):
         self.starting_order = not self.starting_order
@@ -143,17 +145,19 @@ class SelectAgentsScene(Scene):
         Scene.render(self, screen)
 
         screen.blit(self.player_label, (16, 16))
-        screen.blit(self.gossip_weight_label, (271, 58))
+        screen.blit(self.discrimination_threshold_label, (553, 20))
+        self.discrimination_threshold_input.render(screen)
+        screen.blit(self.gossip_weight_label, (19, 59))
         self.gossip_weight_input.render(screen)
-        screen.blit(self.trust_criteria_label, (19, 100))
+        screen.blit(self.trust_criteria_label, (357, 59))
         self.trust_criteria_input.render(screen)
-        screen.blit(self.number_of_players_label, (412, 100))
+        screen.blit(self.number_of_players_label, (682, 59))
         self.number_of_players_input.render(screen)
 
-        screen.blit(self.self_advertisement_radio_label, (672, 58))
-        screen.blit(self.self_advertisement_radio_yes_label, (851, 58))
+        screen.blit(self.self_advertisement_radio_label, (19, 102))
+        screen.blit(self.self_advertisement_radio_yes_label, (198, 102))
         self.self_advertisement_radio_yes.render(screen)
-        screen.blit(self.self_advertisement_radio_no_label, (912, 58))
+        screen.blit(self.self_advertisement_radio_no_label, (259, 102))
         self.self_advertisement_radio_no.render(screen)
 
         self.add_button.render(screen, "Add")
@@ -221,11 +225,9 @@ class SelectAgentsScene(Scene):
         screen.blit(self.max_image_score_range_label, (493, 511))
         self.max_image_score_range_input.render(screen)
 
-        self.start_button.render(screen, "Start")
+        self.start_button.render(screen, "Save")
 
-        self.player_dropdown.render(screen)
         self.discrimination_type_dropdown.render(screen)
-        self.discrimination_threshold_dropdown.render(screen)
         self.evolution_type_dropdown.render(screen)
         self.gossip_type_dropdown.render(screen)
 
@@ -240,43 +242,47 @@ class SelectAgentsScene(Scene):
                 self.chips.append(chip)
                 start += chip.rect.w + 16
         self.scroll.update(self.chips)
+        self.gossip_type_dropdown.update()
+        self.discrimination_type_dropdown.update()
+        self.evolution_type_dropdown.update()
 
     def handle_events(self, events):
         """Handles all the objects events, and when the button is pressed will move to the next scene"""
         Scene.handle_events(self, events)
 
         for event in events:
-            self.player_dropdown.handle_events(event)
-            self.discrimination_type_dropdown.handle_events(event)
-            self.discrimination_threshold_dropdown.handle_events(event)
-            self.evolution_type_dropdown.handle_events(event)
-            self.gossip_type_dropdown.handle_events(event)
+            active = False
+            active = active or self.discrimination_type_dropdown.handle_events(event)
+            active = active or self.evolution_type_dropdown.handle_events(event)
+            active = active or self.gossip_type_dropdown.handle_events(event)
 
-            self.gossip_weight_input.handle_events(event)
-            self.trust_criteria_input.handle_events(event)
-            self.number_of_players_input.handle_events(event)
-            self.number_of_conductors_input.handle_events(event)
-            self.number_of_rounds_input.handle_events(event)
-            self.giving_encounters_input.handle_events(event)
-            self.gossip_encounters_input.handle_events(event)
-            self.events_file_name_input.handle_events(event)
-            self.results_file_name_input.handle_events(event)
-            self.benefit_cooperation_input.handle_events(event)
-            self.cost_cooperation_input.handle_events(event)
-            self.start_time_input.handle_events(event)
-            self.min_image_score_range_input.handle_events(event)
-            self.min_generation_range_input.handle_events(event)
-            self.max_image_score_range_input.handle_events(event)
-            self.max_generation_range_input.handle_events(event)
+            if not active:
+                self.discrimination_threshold_input.handle_events(event)
+                self.gossip_weight_input.handle_events(event)
+                self.trust_criteria_input.handle_events(event)
+                self.number_of_players_input.handle_events(event)
+                self.number_of_conductors_input.handle_events(event)
+                self.number_of_rounds_input.handle_events(event)
+                self.giving_encounters_input.handle_events(event)
+                self.gossip_encounters_input.handle_events(event)
+                self.events_file_name_input.handle_events(event)
+                self.results_file_name_input.handle_events(event)
+                self.benefit_cooperation_input.handle_events(event)
+                self.cost_cooperation_input.handle_events(event)
+                self.start_time_input.handle_events(event)
+                self.min_image_score_range_input.handle_events(event)
+                self.min_generation_range_input.handle_events(event)
+                self.max_image_score_range_input.handle_events(event)
+                self.max_generation_range_input.handle_events(event)
 
-            if self.add_button.handle_events(event):
-                self.agents.append("Cooperate 100")
-            if self.start_button.handle_events(event):
-                self.manager.go_to(PlayTournamentScene())
+                if self.add_button.handle_events(event):
+                    self.agents.append("Cooperate 100")
+                if self.start_button.handle_events(event):
+                    self.manager.go_to(PlayTournamentScene())
 
-            self.self_advertisement_radio_no.handle_events(event)
-            self.self_advertisement_radio_yes.handle_events(event)
-            self.starting_order_radio_gossip.handle_events(event)
-            self.starting_order_radio_giving.handle_events(event)
-            if i := self.scroll.handle_events(event):
-                self.agents.pop(i - 1)
+                self.self_advertisement_radio_no.handle_events(event)
+                self.self_advertisement_radio_yes.handle_events(event)
+                self.starting_order_radio_gossip.handle_events(event)
+                self.starting_order_radio_giving.handle_events(event)
+                if i := self.scroll.handle_events(event):
+                    self.agents.pop(i - 1)
