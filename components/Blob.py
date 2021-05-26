@@ -29,7 +29,7 @@ class Blob:
     handle_events(event, agent)
         When blob is clicked does something
     """
-    def __init__(self, pos, playing=False, watching=False, gossiping=False):
+    def __init__(self, pos, player=False, conductor=False):
         """
         Parameters
         ----------
@@ -43,14 +43,11 @@ class Blob:
             stores if the agent is gossiping or not
         """
         self.pos = pos
+        self.player = player
 
-        if playing:
+        if conductor:
             self.color = (255, 0, 0)
-        elif watching:
-            self.color = (0, 0, 255)
-        elif gossiping:
-            self.color = (0, 200, 200)
-        else:
+        elif player:
             self.color = (0, 255, 0)
 
         self.circle = pygame.Rect(pos[0]-7, pos[1]-7, 14, 14)
@@ -68,7 +65,7 @@ class Blob:
         gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 8, self.color)
         gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 6, (0, 0, 0))
 
-    def update(self, playing=False, watching=False, gossiping=False):
+    def update(self, playing=False):
         """Update the color of the agent
 
         Parameters
@@ -80,14 +77,14 @@ class Blob:
         gossiping: bool
             stores if the agent is gossiping or not
         """
-        if playing:
-            self.color = (255, 0, 0)
-        elif watching:
-            self.color = (255, 0, 255)
-        elif gossiping:
-            self.color = (0, 200, 200)
-        else:
+        if self.player:
             self.color = (0, 255, 0)
+            if playing:
+                self.color = (255, 255, 0)
+        else:
+            self.color = (255, 0, 0)
+            if playing:
+                self.color = (255, 0, 255)
 
     def handle_events(self, event, agent):
         """When blob is clicked does something

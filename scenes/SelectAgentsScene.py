@@ -312,6 +312,8 @@ class SelectAgentsScene(Scene):
                     print("output(resultsin('" + self.results_file_name_input.get_text() + "')),")
                     print("output(eventsin('" + self.events_file_name_input.get_text() + "'))")
 
+                    self.manager.go_to(PlayTournamentScene())
+
 
                 self.self_advertisement_radio_no.handle_events(event)
                 self.self_advertisement_radio_yes.handle_events(event)
