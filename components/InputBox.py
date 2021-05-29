@@ -36,7 +36,7 @@ class InputBox:
     handle_events(event)
         If it is clicked activates the box, and if it is active and a key is pressed updates the text inside
     """
-    def __init__(self, pos=(100, 100), w=140, h=40, text=""):
+    def __init__(self, pos=(100, 100), w=140, h=40, text="", fro=None, to=None, decimal=False, negative=False, file=False):
         """
         Parameters
         ----------
@@ -58,6 +58,17 @@ class InputBox:
         self.active = False
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
         self.label = self.font.render(self.text, True, (255, 255, 255))
+        if fro is not None and to is not None:
+            self.range = {"start": fro, "stop": to}
+        else:
+            self.range = None
+        self.decimal = decimal
+        self.negative = negative
+        self.file = file
+        self.key_repeat = 250
+        pygame.key.set_repeat(int(self.key_repeat))
+        self.history = [self.text]
+        self.BACK_TO_NORMAL = pygame.USEREVENT + 1
 
     def render(self, screen):
         """Renders the box and its text inside
@@ -83,6 +94,11 @@ class InputBox:
         str
             text inside of the box
         """
+        if len(self.text) == 0:
+            self.color = (255, 0, 0)
+            pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+            return False
+
         return self.text
 
     def handle_events(self, event):
@@ -93,17 +109,88 @@ class InputBox:
         event: pygame.event.Event
             pygame event
         """
+        self.history = self.history[-1000:]
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos[0], event.pos[1]):
                 self.active = True
             else:
                 self.active = False
             self.color = self.active_color if self.active else self.inactive_color
+
         if event.type == pygame.KEYDOWN:
             if self.active:
-                if event.key == pygame.K_BACKSPACE:
+                if pygame.key.get_mods() and pygame.KMOD_CTRL and event.key == pygame.K_z:
+                    try:
+                        if self.text != (temp := self.history.pop(-1)):
+                            self.text = temp
+                        else:
+                            self.text = self.history.pop(-1)
+                        if len(self.history) < 1:
+                            self.history = [self.text]
+                    except IndexError:
+                        self.history.append(self.text)
+
+                elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
+                    self.history.append(self.text)
+
                 elif event.key in [pygame.K_0, pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6,
                                    pygame.K_7, pygame.K_8, pygame.K_9]:
                     self.text += event.unicode
+                    if self.range:
+                        if not (self.range["start"] <= float(self.text) <= self.range["stop"]):
+                            self.text = self.text[:-1]
+                            self.color = (255, 0, 0)
+                            pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+                    else:
+                        self.history.append(self.text)
+
+                elif self.decimal and event.key in [pygame.K_PERIOD]:
+                    self.text += event.unicode
+                    try:
+                        float(self.text)
+                        self.history.append(self.text)
+                    except ValueError:
+                        self.text = self.text[:-1]
+                        self.color = (255, 0, 0)
+                        pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+
+                elif self.negative and event.key in [pygame.K_MINUS]:
+                    self.text += event.unicode
+                    try:
+                        float(self.text)
+                        self.history.append(self.text)
+                    except ValueError:
+                        if len(self.text) > 1:
+                            self.text = self.text[:-1]
+                            self.color = (255, 0, 0)
+                            pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+                        else:
+                            self.history.append(self.text)
+
+                elif not(pygame.key.get_mods() and pygame.KMOD_CTRL):
+                    if self.file and event.key not in [pygame.K_SLASH, pygame.K_BACKSLASH, pygame.K_QUESTION,
+                                                         pygame.K_PERCENT, pygame.K_ASTERISK, pygame.K_COLON,
+                                                         pygame.K_EQUALS, pygame.K_QUOTE, pygame.K_LESS,
+                                                         pygame.K_GREATER, pygame.K_COMMA, pygame.K_SEMICOLON,
+                                                         pygame.K_SPACE, pygame.K_TAB]:
+                        self.text += event.unicode
+                        self.history.append(self.text)
+
+                if not self.file and (not self.negative and event.key in [pygame.K_MINUS] or not self.decimal and event.key in [pygame.K_PERIOD]):
+                    self.color = (255, 0, 0)
+                    pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+
                 self.label = self.font.render(self.text, True, (255, 255, 255))
+
+            pygame.key.set_repeat(int(self.key_repeat))
+            self.key_repeat /= 1.5
+            if self.key_repeat < 50:
+                self.key_repeat = 50
+
+        if event.type == self.BACK_TO_NORMAL:
+            self.color = self.active_color if self.active else self.inactive_color
+
+        if event.type == pygame.KEYUP:
+            self.key_repeat = 250
+            pygame.key.set_repeat(int(self.key_repeat))

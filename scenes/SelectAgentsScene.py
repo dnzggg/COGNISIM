@@ -65,11 +65,11 @@ class SelectAgentsScene(Scene):
         self.discrimination_type_dropdown = Dropdown("Discrimination Type", w=193, pos=(334, 16), selections=self.discrimination_type_list)
 
         self.discrimination_threshold_label = self.font2.render("Discrimination Threshold (-5 to 5.5):", True, (255, 255, 255))
-        self.discrimination_threshold_input = InputBox((833, 16), w=101, h=27, text="0.543")
+        self.discrimination_threshold_input = InputBox((833, 16), w=101, h=27, text="0.543", fro=-5, to=5.5, decimal=True, negative=True)
         self.gossip_weight_label = self.font2.render("Gossip Weight (0 to 1):", True, (255, 255, 255))
-        self.gossip_weight_input = InputBox((196, 55), w=101, h=27, text="0.543")
+        self.gossip_weight_input = InputBox((196, 55), w=101, h=27, text="0.543", fro=0, to=1, decimal=True)
         self.trust_criteria_label = self.font2.render("Trust Criteria (0 to 1):", True, (255, 255, 255))
-        self.trust_criteria_input = InputBox((521, 55), w=101, h=27, text="0.543")
+        self.trust_criteria_input = InputBox((521, 55), w=101, h=27, text="0.543", fro=0, to=1, decimal=True)
         self.number_of_players_label = self.font2.render("Number of Players:", True, (255, 255, 255))
         self.number_of_players_input = InputBox((833, 55), w=101, h=27, text="1000")
 
@@ -108,9 +108,9 @@ class SelectAgentsScene(Scene):
         self.starting_order_radio_gossip.bind(self.starting_order_radio_giving, self.change_starting_order)
 
         self.events_file_name_label = self.font2.render("Events File Name:", True, (255, 255, 255))
-        self.events_file_name_input = InputBox((162, 326), w=236, h=27, text="example.event")
+        self.events_file_name_input = InputBox((162, 326), w=236, h=27, text="example.event", file=True)
         self.results_file_name_label = self.font2.render("Results File Name:", True, (255, 255, 255))
-        self.results_file_name_input = InputBox((162, 365), w=236, h=27, text="example.res")
+        self.results_file_name_input = InputBox((162, 365), w=236, h=27, text="example.res", file=True)
         self.benefit_cooperation_label = self.font2.render("Benefit of Cooperation:", True, (255, 255, 255))
         self.benefit_cooperation_input = InputBox((607, 326), w=101, h=27, text="10")
         self.cost_cooperation_label = self.font2.render("Cost of Cooperation:", True, (255, 255, 255))
@@ -123,13 +123,13 @@ class SelectAgentsScene(Scene):
 
         self.generation_range_label = self.font.render("Generation Range", True, (255, 255, 255))
         self.min_generation_range_label = self.font2.render("Minimum Generation Range:", True, (255, 255, 255))
-        self.min_generation_range_input = InputBox((246, 468), w=101, h=27, text="-5")
+        self.min_generation_range_input = InputBox((246, 468), w=101, h=27, text="-5", negative=True)
         self.max_generation_range_label = self.font2.render("Maximum Generation Range:", True, (255, 255, 255))
         self.max_generation_range_input = InputBox((246, 507), w=101, h=27, text="5")
 
         self.image_score_range_label = self.font.render("Image Score Range", True, (255, 255, 255))
         self.min_image_score_range_label = self.font2.render("Minimum Image Score:", True, (255, 255, 255))
-        self.min_image_score_range_input = InputBox((680, 468), w=101, h=27, text="-5")
+        self.min_image_score_range_input = InputBox((680, 468), w=101, h=27, text="-5", negative=True)
         self.max_image_score_range_label = self.font2.render("Maximum Image Score:", True, (255, 255, 255))
         self.max_image_score_range_input = InputBox((680, 507), w=101, h=27, text="5")
 
@@ -291,6 +291,7 @@ class SelectAgentsScene(Scene):
                         {"d_ty": discrimination_type, "d_th": discrimination_threshold, "g_t": gossip_type,
                          "g_w": gossip_weight, "t_c": trust_criteria, "s_a": self_advertisement,
                          "n": number_of_players})
+
                 if self.start_button.handle_events(event):
                     for item in self.added:
                         items = list(item.values())
