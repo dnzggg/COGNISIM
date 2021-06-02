@@ -4,7 +4,7 @@ import tkinter
 
 import pygame
 
-from components.SceneManager import SceneManager
+from objects.SceneManager import SceneManager
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
 

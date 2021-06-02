@@ -1,6 +1,6 @@
 import pygame
 
-from components import Background, Button, Scene
+from objects import Background, Button, Scene
 from .SelectAgentsScene import SelectAgentsScene
 
 

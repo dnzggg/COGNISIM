@@ -76,7 +76,7 @@ class MessageBox:
 
         if self.rect.w - 8 > self.font.size(str(question))[0]:
             text1 = self.font.render(str(question), True, (255, 255, 255))
-            screen.blit(text1, (self.rect.x + 10, self.rect.y))
+            screen.blit(text1, (self.rect.x + 10, self.rect.y + 5))
         else:
             question += " "
             t = ""
@@ -86,12 +86,12 @@ class MessageBox:
                 t += string + " "
                 if self.rect.w - 8 < self.font.size(str(t))[0] and string != "":
                     text1 = self.font.render(str(temp), True, (255, 255, 255))
-                    screen.blit(text1, (self.rect.x + 10, self.rect.y + (line * (self.font_size + 10))))
+                    screen.blit(text1, (self.rect.x + 10, self.rect.y + 5 + (line * (self.font_size + 10))))
                     t = string + " "
                     line += 1
                 else:
                     text1 = self.font.render(str(t), True, (255, 255, 255))
-                    screen.blit(text1, (self.rect.x + 10, self.rect.y + (line * (self.font_size + 10))))
+                    screen.blit(text1, (self.rect.x + 10, self.rect.y + 5 + (line * (self.font_size + 10))))
 
         if self.highlight_yes:
             surface = pygame.Surface((45, 30), pygame.SRCALPHA)
@@ -121,7 +121,7 @@ class MessageBox:
         event: pygame.event.Event
             pygame event
         """
-        self.ask_again_rb.handle_events(event, [])
+        self.ask_again_rb.handle_events(event)
         if self.show:
             x, y = pygame.mouse.get_pos()
             if self.rect.x + self.rect.w - 105 < x < self.rect.x + self.rect.w - 60 and \

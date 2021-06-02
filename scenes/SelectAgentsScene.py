@@ -1,7 +1,7 @@
 import pygame
 from pygame import gfxdraw
 
-from components import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem
+from objects import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem
 from .PlayTournamentScene import PlayTournamentScene
 
 
@@ -42,7 +42,7 @@ class SelectAgentsScene(Scene):
     Methods
     -------
     render(screen)
-        Renders the radio buttons for tournament selection, labels for description, input boxes to get the values, and
+        Renders the radio buttons for components selection, labels for description, input boxes to get the values, and
         the button
     update()
         Update input box text, and radio buttons
@@ -142,7 +142,7 @@ class SelectAgentsScene(Scene):
         self.self_advertisement = not self.self_advertisement
 
     def render(self, screen):
-        """Renders the radio buttons for tournament selection, labels for description, input boxes to get the values,
+        """Renders the radio buttons for components selection, labels for description, input boxes to get the values,
                 and the button"""
         Scene.render(self, screen)
 

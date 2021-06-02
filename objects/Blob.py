@@ -60,10 +60,15 @@ class Blob:
         screen: pygame.Surface
             pygame screen
         """
-        # pygame.draw.circle(screen, self.color, self.pos, 8, 0)
-        gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 8, self.color)
-        gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 8, self.color)
-        gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 6, (0, 0, 0))
+        # pygame.draw.circle(screen, self.color, self.pos, 7, 0)
+        if self.player:
+            gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 7, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 7, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 5, (0, 0, 0))
+        else:
+            gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 7, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 7, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 5, (0, 0, 0))
 
     def update(self, playing=False):
         """Update the color of the agent

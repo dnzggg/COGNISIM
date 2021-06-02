@@ -2,7 +2,9 @@ import random
 
 import pygame
 
-from components import Blob, Button, RadioButton, Scene, Graph, Slider, MessageBox, PositionDict
+from objects import Blob, Button, RadioButton, Scene, Graph, Slider, MessageBox, PositionDict
+
+from components import Tournament
 
 
 def rot_center(image, angle):
@@ -16,7 +18,7 @@ def rot_center(image, angle):
 
 
 class PlayTournamentScene(Scene):
-    """Scene where the user can see the simulation and interact with its components.
+    """Scene where the user can see the simulation and interact with its objects.
     
     Attributes
     ----------
@@ -29,9 +31,9 @@ class PlayTournamentScene(Scene):
     was_running: bool
         Store if the simulation was running or not
     new_generation: bool
-        Store if the tournament is over or not
+        Store if the components is over or not
     run: Tournament.start()
-        Method that initializes the tournament
+        Method that initializes the components
     UPDATE: pygame.USEREVENT
         Event that will call the next step in the simulation
     speed: int
@@ -81,7 +83,7 @@ class PlayTournamentScene(Scene):
     number_of_each_agent: dict
         dictionary that stores how many each distinct agent type has per round (for displaying the graph)
     message_box: MessageBox
-        MessageBox object to ask the user if they want to continue to the next tournament
+        MessageBox object to ask the user if they want to continue to the next components
     selection1_rb: RadioButton
         First selection process radio button
     selection2_rb: RadioButton
@@ -111,10 +113,18 @@ class PlayTournamentScene(Scene):
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
 
+        self.tournament = Tournament()
+        self.run = self.tournament.start()
+        self.agents = self.tournament.get_agents()
+        self.conductors = self.tournament.get_conductors()
+        self.blobs = dict()
+        self.playing_agents = None
+
         self.running = False
-        self.generation = 0
+        self.new_generation = False
+        self.generation = self.tournament.generation
         self.total_generations = 100
-        self.round = 0
+        self.round = self.tournament.round
         self.total_rounds = 1000
         self.giving_encounter = 150
         self.total_giving_encounters = 1000
@@ -136,16 +146,18 @@ class PlayTournamentScene(Scene):
         self.speed_outside_im = pygame.transform.smoothscale(self.speed_outside_im, (30, 30))
         self.speed_inside_im = pygame.image.load("Images/speedometer_inside.png")
         self.speed_inside_im = pygame.transform.smoothscale(self.speed_inside_im, (15, 15))
-        self.speed_slider = Slider((642, 64), 240, fro=-100, to=100)
+        self.speed_slider = Slider((642, 64), 240, fro=5, to=100)
+
+        self.message_box = MessageBox(400, 133)
 
     def render(self, screen):
         """Renders the blobs, buttons, radio buttons, labels and lines"""
         Scene.render(self, screen)
 
-        generation_label = self.font2.render(f"{self.generation} Generation / {self.total_generations} Generations",
+        generation_label = self.font2.render(f"{self.tournament.generation} Generation / {self.total_generations} Generations",
                                              True, (255, 255, 255))
         screen.blit(generation_label, (8, 8))
-        round_label = self.font2.render(f"{self.generation} Round / {self.total_generations} Rounds",
+        round_label = self.font2.render(f"{self.tournament.round} Round / {self.total_rounds} Rounds",
                                         True, (255, 255, 255))
         screen.blit(round_label, (8, 43))
         giving_encounter_label = self.font2.render(
@@ -182,8 +194,67 @@ class PlayTournamentScene(Scene):
         pygame.draw.line(screen, (251, 164, 98), (575, 0), (575, 105), 3)
         pygame.draw.line(screen, (251, 164, 98), (734, 106), (734, 550), 3)
 
+        for agent in self.blobs:
+            self.blobs[agent].render(screen)
+
+        if self.new_generation:
+            self.message_box.render(screen, "Do you want to continue to a new tournament?")
+
     def update(self):
         """Updates the blobs status, messagebox, and slider"""
+        self.agents = self.tournament.get_agents()
+        self.conductors = self.tournament.get_conductors()
+
+        if self.new_generation:
+            if self.message_box.ask_again:
+                self.message_box.show = True
+            else:
+                self.running = self.was_running
+                self.new_generation = False
+                self.message_box.show = False
+                self.message_box.answer = ""
+                self.blobs = dict()
+            if self.message_box.answer == "yes":
+                self.running = self.was_running
+                self.new_generation = False
+                self.message_box.show = False
+                self.message_box.answer = ""
+                self.blobs = dict()
+            elif self.message_box.answer == "":
+                pass
+            else:
+                pygame.quit()
+                exit(0)
+        else:
+            if self.blobs:
+                for agent in self.agents:
+                    if self.playing_agents:
+                        if agent in self.playing_agents:
+                            self.blobs[agent].update(playing=True)
+                            continue
+                    self.blobs[agent].update()
+            else:
+                positions = PositionDict()
+                positions[(range(0, 295), range(80, 185))] = ""
+                for agent in (self.conductors + self.agents):
+                    x = random.randrange(10, 725)
+                    y = random.randrange(115, 540)
+                    cont = True
+                    while cont:
+                        try:
+                            if positions[(x, y)] == "":
+                                x = random.randrange(10, 725)
+                                y = random.randrange(115, 540)
+                        except KeyError:
+                            cont = False
+
+                    positions[(range(x - 15, x + 15), range(y - 15, y + 15))] = ""
+                    if agent.conductor:
+                        self.blobs[agent] = Blob((x, y), conductor=True)
+                    else:
+                        self.blobs[agent] = Blob((x, y), player=True)
+                del positions
+
         self.speed_slider.update()
         if int(self.speed_slider.number) != self.speed:
             self.speed = int(self.speed_slider.number)
@@ -197,11 +268,25 @@ class PlayTournamentScene(Scene):
 
         for event in events:
             self.speed_slider.handle_events(event)
+            self.message_box.handle_events(event)
             if self.reset_button.handle_events(event):
-                print("reset")
+                self.manager.go_to(self.manager.previous)
+
             if self.prev_button.handle_events(event):
                 print("prev")
+
             if self.start_stop_button.handle_events(event):
+                self.tournament.start()
                 self.running = not self.running
+
+            if event.type == self.UPDATE and self.running:
+                if next(self.run):
+                    self.new_generation = True
+                    self.was_running = self.running
+                    self.running = False
+
             if self.next_button.handle_events(event):
-                print("next")
+                if next(self.run):
+                    self.new_generation = True
+                    self.was_running = self.running
+                    self.running = False
