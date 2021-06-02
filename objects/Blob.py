@@ -52,7 +52,10 @@ class Blob:
 
         self.circle = pygame.Rect(pos[0]-7, pos[1]-7, 14, 14)
 
-    def render(self, screen):
+        self.show_name = False
+        self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
+
+    def render(self, screen, agent):
         """Renders the blob on the pygame screen
 
         Parameters
@@ -69,6 +72,12 @@ class Blob:
             gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 7, self.color)
             gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 7, self.color)
             gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 5, (0, 0, 0))
+
+        if self.show_name:
+            text = self.font.render(agent.name, True, (255, 255, 255))
+            w = text.get_size()[0]
+            pygame.draw.rect(screen, (112, 112, 112), (self.pos[0] + 7, self.pos[1] - 27, w + 6, 20), border_radius=3)
+            screen.blit(text, (self.pos[0] + 10, self.pos[1] - 27))
 
     def update(self, playing=False):
         """Update the color of the agent
@@ -101,6 +110,8 @@ class Blob:
         event: pygame.event.Event
             pygame event
         """
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEMOTION:
             if self.circle.collidepoint(event.pos[0], event.pos[1]):
-                print(agent)
+                self.show_name = True
+            else:
+                self.show_name = False

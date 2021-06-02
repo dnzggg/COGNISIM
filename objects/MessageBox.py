@@ -141,5 +141,6 @@ class MessageBox:
                     self.answer = "no"
             else:
                 self.highlight_no = False
+            return True
 
 

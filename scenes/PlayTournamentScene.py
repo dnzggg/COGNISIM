@@ -194,8 +194,13 @@ class PlayTournamentScene(Scene):
         pygame.draw.line(screen, (251, 164, 98), (575, 0), (575, 105), 3)
         pygame.draw.line(screen, (251, 164, 98), (734, 106), (734, 550), 3)
 
+        render_after = None
         for agent in self.blobs:
-            self.blobs[agent].render(screen)
+            if self.blobs[agent].show_name:
+                render_after = agent
+            self.blobs[agent].render(screen, agent)
+        if render_after:
+            self.blobs[render_after].render(screen, render_after)
 
         if self.new_generation:
             self.message_box.render(screen, "Do you want to continue to a new tournament?")
@@ -267,26 +272,30 @@ class PlayTournamentScene(Scene):
         Scene.handle_events(self, events)
 
         for event in events:
-            self.speed_slider.handle_events(event)
-            self.message_box.handle_events(event)
-            if self.reset_button.handle_events(event):
-                self.manager.go_to(self.manager.previous)
+            if not self.message_box.handle_events(event):
+                self.speed_slider.handle_events(event)
 
-            if self.prev_button.handle_events(event):
-                print("prev")
+                for agent in self.blobs:
+                    self.blobs[agent].handle_events(event, agent)
 
-            if self.start_stop_button.handle_events(event):
-                self.tournament.start()
-                self.running = not self.running
+                if self.reset_button.handle_events(event):
+                    self.manager.go_to(self.manager.previous)
 
-            if event.type == self.UPDATE and self.running:
-                if next(self.run):
-                    self.new_generation = True
-                    self.was_running = self.running
-                    self.running = False
+                if self.prev_button.handle_events(event):
+                    print("prev")
 
-            if self.next_button.handle_events(event):
-                if next(self.run):
-                    self.new_generation = True
-                    self.was_running = self.running
-                    self.running = False
+                if self.start_stop_button.handle_events(event):
+                    self.tournament.start()
+                    self.running = not self.running
+
+                if event.type == self.UPDATE and self.running:
+                    if next(self.run):
+                        self.new_generation = True
+                        self.was_running = self.running
+                        self.running = False
+
+                if self.next_button.handle_events(event):
+                    if next(self.run):
+                        self.new_generation = True
+                        self.was_running = self.running
+                        self.running = False

@@ -24,10 +24,7 @@ class Tournament:
             for line in f:
                 if not new_generation:
                     line = line.strip()
-                    if re.search(
-                            r"^new_generation\(\d*\):\d",
-                            line):
-                        print("a")
+                    if re.search(r"^new_generation\(\d*\):\d", line):
                         new_generation = True
                         self._agents = []
                         self.generation += 1

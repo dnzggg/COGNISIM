@@ -315,7 +315,6 @@ class SelectAgentsScene(Scene):
 
                     self.manager.go_to(PlayTournamentScene())
 
-
                 self.self_advertisement_radio_no.handle_events(event)
                 self.self_advertisement_radio_yes.handle_events(event)
                 self.starting_order_radio_gossip.handle_events(event)
