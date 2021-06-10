@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from objects import Blob, Button, RadioButton, Scene, Graph, Slider, MessageBox, PositionDict
+from objects import Blob, Button, RadioButton, Scene, DropdownItem, Slider, MessageBox, PositionDict
 
 from components import Tournament
 
@@ -136,17 +136,20 @@ class PlayTournamentScene(Scene):
         self.speed = 99
         pygame.time.set_timer(self.UPDATE, self.speed)
 
-        self.reset_button = Button(w=90, pos=(386, 11), center=True)
-        self.prev_button = Button(w=80, pos=(297, 62), center=True)
-        self.start_stop_button = Button(w=80, pos=(391, 62), center=True)
-        self.next_button = Button(w=80, pos=(484, 62), center=True)
+        self.tab = 0
+        self.home_tab = DropdownItem(pygame.Rect(16, 8, 47, 19), 0, "Home", underline=0, font=15, center=False)
+        self.info_tab = DropdownItem(pygame.Rect(87, 8, 29, 19), 1, "Info", underline=0, font=15, center=False)
+
+        self.reset_button = Button(w=90, pos=(16, 39), center=True)
+        self.start_stop_button = Button(w=80, pos=(130, 39), center=True)
+        self.next_button = Button(w=80, pos=(234, 39), center=True)
 
         self.speed_label = self.font.render("Speed", True, (255, 255, 255))
         self.speed_outside_im = pygame.image.load("Images/speedometer_outside.png")
         self.speed_outside_im = pygame.transform.smoothscale(self.speed_outside_im, (30, 30))
         self.speed_inside_im = pygame.image.load("Images/speedometer_inside.png")
         self.speed_inside_im = pygame.transform.smoothscale(self.speed_inside_im, (15, 15))
-        self.speed_slider = Slider((642, 64), 240, fro=5, to=100)
+        self.speed_slider = Slider((465, 57), 240, fro=5, to=100)
 
         self.message_box = MessageBox(400, 133)
 
@@ -154,45 +157,50 @@ class PlayTournamentScene(Scene):
         """Renders the blobs, buttons, radio buttons, labels and lines"""
         Scene.render(self, screen)
 
-        generation_label = self.font2.render(f"{self.tournament.generation} Generation / {self.total_generations} Generations",
-                                             True, (255, 255, 255))
-        screen.blit(generation_label, (8, 8))
-        round_label = self.font2.render(f"{self.tournament.round} Round / {self.total_rounds} Rounds",
-                                        True, (255, 255, 255))
-        screen.blit(round_label, (8, 43))
-        giving_encounter_label = self.font2.render(
-            f"{self.giving_encounter} Giving Encounter / {self.total_giving_encounters} Rounds",
-            True, (255, 255, 255))
-        screen.blit(giving_encounter_label, (8, 78))
-        gossip_encounter_label = self.font2.render(
-            f"{self.gossip_encounter} Gossip Encounter / {self.total_gossip_encounters} Rounds",
-            True, (255, 255, 255))
-        screen.blit(gossip_encounter_label, (8, 113))
-        encounter_type_label = self.font2.render(f"Encounter type: {self.total_generations}",
-                                                 True, (255, 255, 255))
-        screen.blit(encounter_type_label, (8, 148))
+        self.home_tab.render(screen)
+        self.info_tab.render(screen)
 
-        self.reset_button.render(screen, "Reset")
-        self.prev_button.render(screen, "Prev")
-        if not self.running:
-            self.start_stop_button.render(screen, "Start")
-        else:
-            self.start_stop_button.render(screen, "Stop")
-        self.next_button.render(screen, "Next")
+        if self.tab == 0:
+            self.reset_button.render(screen, "Reset")
+            # self.prev_button.render(screen, "Prev")
+            if not self.running:
+                self.start_stop_button.render(screen, "Start")
+            else:
+                self.start_stop_button.render(screen, "Stop")
+            self.next_button.render(screen, "Next")
 
-        screen.blit(self.speed_label, (589, 8))
-        screen.blit(self.speed_outside_im, (589, 49))
-        speed_inside_im = rot_center(self.speed_inside_im, -(abs(self.speed) * 2.7 - 135))
-        screen.blit(speed_inside_im, (596, 56))
-        self.speed_slider.render(screen)
-        speed_label = self.font.render(str(self.speed), True, (255, 255, 255))
-        screen.blit(speed_label, (906, 51))
+            screen.blit(self.speed_label, (338, 42))
+            screen.blit(self.speed_outside_im, (412, 42))
+            speed_inside_im = rot_center(self.speed_inside_im, -(abs(self.speed) * 2.7 - 135))
+            screen.blit(speed_inside_im, (419, 51))
+            self.speed_slider.render(screen)
+            speed_label = self.font.render(str(self.speed), True, (255, 255, 255))
+            screen.blit(speed_label, (729, 44))
+        elif self.tab == 1:
+            generation_label = self.font2.render(
+                f"{self.tournament.generation} Generation / {self.total_generations} Generations",
+                True, (255, 255, 255))
+            screen.blit(generation_label, (16, 35))
+            round_label = self.font2.render(f"{self.tournament.round} Round / {self.total_rounds} Rounds",
+                                            True, (255, 255, 255))
+            screen.blit(round_label, (407, 35))
+            giving_encounter_label = self.font2.render(
+                f"{self.giving_encounter} Giving Encounter / {self.total_giving_encounters} Rounds",
+                True, (255, 255, 255))
+            screen.blit(giving_encounter_label, (664, 35))
+            gossip_encounter_label = self.font2.render(
+                f"{self.gossip_encounter} Gossip Encounter / {self.total_gossip_encounters} Rounds",
+                True, (255, 255, 255))
+            screen.blit(gossip_encounter_label, (200, 58))
+            encounter_type_label = self.font2.render(f"Encounter type: {self.encounter_type}",
+                                                     True, (255, 255, 255))
+            screen.blit(encounter_type_label, (544, 58))
 
-        pygame.draw.line(screen, (251, 164, 98), (0, 174), (284, 174), 3)
-        pygame.draw.line(screen, (251, 164, 98), (283, 0), (283, 175), 3)
-        pygame.draw.line(screen, (251, 164, 98), (283, 105), (950, 105), 3)
-        pygame.draw.line(screen, (251, 164, 98), (575, 0), (575, 105), 3)
-        pygame.draw.line(screen, (251, 164, 98), (734, 106), (734, 550), 3)
+        pygame.draw.line(screen, (251, 164, 98), (0, 85), (950, 85), 2)
+        # pygame.draw.line(screen, (251, 164, 98), (0, 174), (284, 174), 3)
+        # pygame.draw.line(screen, (251, 164, 98), (283, 0), (283, 175), 3)
+        # pygame.draw.line(screen, (251, 164, 98), (283, 105), (950, 105), 3)
+        # pygame.draw.line(screen, (251, 164, 98), (575, 0), (575, 105), 3)
 
         render_after = None
         for agent in self.blobs:
@@ -240,20 +248,20 @@ class PlayTournamentScene(Scene):
                     self.blobs[agent].update()
             else:
                 positions = PositionDict()
-                positions[(range(0, 295), range(80, 185))] = ""
+                # positions[(range(0, 295), range(80, 185))] = ""
                 for agent in (self.conductors + self.agents):
-                    x = random.randrange(10, 725)
-                    y = random.randrange(115, 540)
+                    x = random.randrange(10, 940)
+                    y = random.randrange(95, 540)
                     cont = True
                     while cont:
                         try:
                             if positions[(x, y)] == "":
-                                x = random.randrange(10, 725)
-                                y = random.randrange(115, 540)
+                                x = random.randrange(10, 940)
+                                y = random.randrange(95, 540)
                         except KeyError:
                             cont = False
 
-                    positions[(range(x - 15, x + 15), range(y - 15, y + 15))] = ""
+                    positions[(range(x - 16, x + 16), range(y - 16, y + 16))] = ""
                     if agent.conductor:
                         self.blobs[agent] = Blob((x, y), conductor=True)
                     else:
@@ -264,6 +272,9 @@ class PlayTournamentScene(Scene):
         if int(self.speed_slider.number) != self.speed:
             self.speed = int(self.speed_slider.number)
             pygame.time.set_timer(self.UPDATE, self.speed)
+
+        self.home_tab.update(self.tab == self.home_tab.index)
+        self.info_tab.update(self.tab == self.info_tab.index)
 
     def handle_events(self, events):
         """If the start button is pressed, starts the simulation; if the next button is pressed, gets the next round;
@@ -281,11 +292,7 @@ class PlayTournamentScene(Scene):
                 if self.reset_button.handle_events(event):
                     self.manager.go_to(self.manager.previous)
 
-                if self.prev_button.handle_events(event):
-                    print("prev")
-
                 if self.start_stop_button.handle_events(event):
-                    self.tournament.start()
                     self.running = not self.running
 
                 if event.type == self.UPDATE and self.running:
@@ -299,3 +306,22 @@ class PlayTournamentScene(Scene):
                         self.new_generation = True
                         self.was_running = self.running
                         self.running = False
+
+                if event.type == pygame.KEYDOWN:
+                    if pygame.key.get_mods() and pygame.KMOD_ALT:
+                        if event.key == pygame.K_h:
+                            self.tab = self.home_tab.index
+                        if event.key == pygame.K_i:
+                            self.tab = self.info_tab.index
+                    if event.key == pygame.K_SPACE:
+                        self.running = not self.running
+                    if event.key == pygame.K_RIGHT:
+                        if next(self.run):
+                            self.new_generation = True
+                            self.was_running = self.running
+                            self.running = False
+
+                if self.home_tab.handle_events(event):
+                    self.tab = self.home_tab.index
+                if self.info_tab.handle_events(event):
+                    self.tab = self.info_tab.index

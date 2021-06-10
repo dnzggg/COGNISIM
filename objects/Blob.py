@@ -46,9 +46,9 @@ class Blob:
         self.player = player
 
         if conductor:
-            self.color = (255, 0, 0)
+            self.color = (255, 0, 0, 100)
         elif player:
-            self.color = (0, 255, 0)
+            self.color = (0, 255, 0, 100)
 
         self.circle = pygame.Rect(pos[0]-7, pos[1]-7, 14, 14)
 
@@ -65,13 +65,13 @@ class Blob:
         """
         # pygame.draw.circle(screen, self.color, self.pos, 7, 0)
         if self.player:
-            gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 7, self.color)
-            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 7, self.color)
-            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 5, (0, 0, 0))
+            gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 8, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 8, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 6, (0, 0, 0))
         else:
-            gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 7, self.color)
-            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 7, self.color)
-            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 5, (0, 0, 0))
+            gfxdraw.filled_circle(screen, self.pos[0], self.pos[1], 8, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 8, self.color)
+            gfxdraw.aacircle(screen, self.pos[0], self.pos[1], 6, (0, 0, 0))
 
         if self.show_name:
             text = self.font.render(agent.name, True, (255, 255, 255))
@@ -92,13 +92,15 @@ class Blob:
             stores if the agent is gossiping or not
         """
         if self.player:
-            self.color = (0, 255, 0)
+            self.color = (0, 255, 0, 100)
             if playing:
-                self.color = (255, 255, 0)
+                # self.color = (255, 255, 0)
+                self.color = (0, 255, 0)
         else:
-            self.color = (255, 0, 0)
+            self.color = (255, 0, 0, 100)
             if playing:
-                self.color = (255, 0, 255)
+                # self.color = (255, 0, 255)
+                self.color = (255, 0, 0)
 
     def handle_events(self, event, agent):
         """When blob is clicked does something
