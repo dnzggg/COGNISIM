@@ -123,22 +123,18 @@ class PlayTournamentScene(Scene):
         self.running = False
         self.new_generation = False
         self.generation = self.tournament.generation
-        self.total_generations = 100
-        self.round = self.tournament.round
-        self.total_rounds = 1000
-        self.giving_encounter = 150
-        self.total_giving_encounters = 1000
-        self.gossip_encounter = 150
-        self.total_gossip_encounters = 1000
-        self.encounter_type = "Giving"
+        self.total_generations = self.tournament.total_generations
+        self.total_rounds = self.tournament.total_rounds
+        self.total_giving_encounters = self.tournament.total_giving_encounters
+        self.total_gossip_encounters = self.tournament.total_gossip_encounters
 
         self.UPDATE = pygame.USEREVENT + 1
         self.speed = 99
         pygame.time.set_timer(self.UPDATE, self.speed)
 
         self.tab = 0
-        self.home_tab = DropdownItem(pygame.Rect(16, 8, 47, 19), 0, "Home", underline=0, font=15, center=False)
-        self.info_tab = DropdownItem(pygame.Rect(87, 8, 29, 19), 1, "Info", underline=0, font=15, center=False)
+        self.home_tab = DropdownItem(pygame.Rect(18, 8, 47, 19), 0, "Home", underline=0, font=15, center=False)
+        self.info_tab = DropdownItem(pygame.Rect(89, 8, 29, 19), 1, "Info", underline=0, font=15, center=False)
 
         self.reset_button = Button(w=90, pos=(16, 39), center=True)
         self.start_stop_button = Button(w=80, pos=(130, 39), center=True)
@@ -181,34 +177,64 @@ class PlayTournamentScene(Scene):
                 f"{self.tournament.generation} Generation / {self.total_generations} Generations",
                 True, (255, 255, 255))
             screen.blit(generation_label, (16, 35))
-            round_label = self.font2.render(f"{self.tournament.round} Round / {self.total_rounds} Rounds",
+            round_label = self.font2.render(f"{self.tournament.round % self.total_rounds} Round / {self.total_rounds} Rounds",
                                             True, (255, 255, 255))
             screen.blit(round_label, (407, 35))
             giving_encounter_label = self.font2.render(
-                f"{self.giving_encounter} Giving Encounter / {self.total_giving_encounters} Rounds",
+                f"{self.tournament.giving_encounters % self.total_giving_encounters} Giving Encounter / {self.total_giving_encounters} Rounds",
                 True, (255, 255, 255))
             screen.blit(giving_encounter_label, (664, 35))
             gossip_encounter_label = self.font2.render(
-                f"{self.gossip_encounter} Gossip Encounter / {self.total_gossip_encounters} Rounds",
+                f"{self.tournament.gossip_encounters % self.total_gossip_encounters} Gossip Encounter / {self.total_gossip_encounters} Rounds",
                 True, (255, 255, 255))
             screen.blit(gossip_encounter_label, (200, 58))
-            encounter_type_label = self.font2.render(f"Encounter type: {self.encounter_type}",
+            encounter_type_label = self.font2.render(f"Encounter type: {self.tournament.encounter_type}",
                                                      True, (255, 255, 255))
             screen.blit(encounter_type_label, (544, 58))
 
-        pygame.draw.line(screen, (251, 164, 98), (0, 85), (950, 85), 2)
+        pygame.draw.line(screen, (247, 95, 23), (0, 85), (950, 85), 2)
         # pygame.draw.line(screen, (251, 164, 98), (0, 174), (284, 174), 3)
         # pygame.draw.line(screen, (251, 164, 98), (283, 0), (283, 175), 3)
         # pygame.draw.line(screen, (251, 164, 98), (283, 105), (950, 105), 3)
         # pygame.draw.line(screen, (251, 164, 98), (575, 0), (575, 105), 3)
 
-        render_after = None
+        pos1 = pos2 = None
+        if self.tournament.receiver_agent and self.tournament.giver_agent:
+            pos1 = self.blobs[self.tournament.receiver_agent].pos
+            pos2 = self.blobs[self.tournament.giver_agent].pos
+        if self.tournament.gossiping_agents:
+            pos1 = self.blobs[self.tournament.gossiping_agents[0]].pos
+            pos2 = self.blobs[self.tournament.gossiping_agents[1]].pos
+
+        render_after = []
         for agent in self.blobs:
             if self.blobs[agent].show_name:
-                render_after = agent
+                render_after.append(agent)
+            if agent in [self.tournament.giver_agent, self.tournament.receiver_agent]:
+                render_after.append(agent)
+            if agent in self.tournament.gossiping_agents:
+                render_after.append(agent)
             self.blobs[agent].render(screen, agent)
-        if render_after:
-            self.blobs[render_after].render(screen, render_after)
+
+        if pos1 and pos2:
+            color = (255, 255, 255)
+            if self.tournament.encounter_type == "Gossip":
+                if self.tournament.gossip:
+                    color = (0, 0, 255)
+            else:
+                if self.tournament.cooperate is not None:
+                    if self.tournament.cooperate:
+                        color = (0, 255, 0)
+                    else:
+                        color = (255, 0, 0)
+            pygame.draw.aaline(screen, color, (pos1[0]-2, pos1[1]), (pos2[0]-2, pos2[1]), blend=100)
+            pygame.draw.aaline(screen, color, (pos1[0]-1, pos1[1]), (pos2[0]-1, pos2[1]), blend=100)
+            pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
+            pygame.draw.aaline(screen, color, (pos1[0], pos1[1]-1), (pos2[0], pos2[1]-1), blend=100)
+            pygame.draw.aaline(screen, color, (pos1[0], pos1[1]-2), (pos2[0], pos2[1]-2), blend=100)
+
+        for ra in render_after:
+            self.blobs[ra].render(screen, ra)
 
         if self.new_generation:
             self.message_box.render(screen, "Do you want to continue to a new tournament?")
@@ -241,15 +267,24 @@ class PlayTournamentScene(Scene):
         else:
             if self.blobs:
                 for agent in self.agents:
-                    if self.playing_agents:
-                        if agent in self.playing_agents:
-                            self.blobs[agent].update(playing=True)
-                            continue
+                    if agent == self.tournament.giver_agent:
+                        self.blobs[agent].update(giver=True)
+                        continue
+                    if agent == self.tournament.receiver_agent:
+                        self.blobs[agent].update(receiver=True)
+                        continue
+                    if agent in self.tournament.gossiping_agents:
+                        self.blobs[agent].update(gossiping=True)
+                        continue
                     self.blobs[agent].update()
             else:
                 positions = PositionDict()
                 # positions[(range(0, 295), range(80, 185))] = ""
-                for agent in (self.conductors + self.agents):
+                x = 474
+                y = 317
+                positions[(range(x - 16, x + 16), range(y - 16, y + 16))] = ""
+                self.blobs[self.conductors[0]] = Blob((x, y), conductor=True)
+                for agent in self.agents:
                     x = random.randrange(10, 940)
                     y = random.randrange(95, 540)
                     cont = True
@@ -262,10 +297,7 @@ class PlayTournamentScene(Scene):
                             cont = False
 
                     positions[(range(x - 16, x + 16), range(y - 16, y + 16))] = ""
-                    if agent.conductor:
-                        self.blobs[agent] = Blob((x, y), conductor=True)
-                    else:
-                        self.blobs[agent] = Blob((x, y), player=True)
+                    self.blobs[agent] = Blob((x, y), player=True)
                 del positions
 
         self.speed_slider.update()

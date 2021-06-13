@@ -166,11 +166,11 @@ class SelectAgentsScene(Scene):
 
         self.scroll.render(screen)
 
-        pygame.draw.line(screen, (251, 164, 98), (16, 201), (934, 201), 5)
-        gfxdraw.filled_circle(screen, 16, 201, 2, (251, 164, 98))
-        gfxdraw.aacircle(screen, 16, 201, 2, (251, 164, 98))
-        gfxdraw.filled_circle(screen, 934, 201, 2, (251, 164, 98))
-        gfxdraw.aacircle(screen, 934, 201, 2, (251, 164, 98))
+        pygame.draw.line(screen, (247, 95, 23), (16, 201), (934, 201), 5)
+        gfxdraw.filled_circle(screen, 16, 201, 2, (247, 95, 23))
+        gfxdraw.aacircle(screen, 16, 201, 2, (247, 95, 23))
+        gfxdraw.filled_circle(screen, 934, 201, 2, (247, 95, 23))
+        gfxdraw.aacircle(screen, 934, 201, 2, (247, 95, 23))
 
         screen.blit(self.conductor_label, (16, 222))
         screen.blit(self.number_of_conductors_label, (275, 225))
@@ -188,11 +188,11 @@ class SelectAgentsScene(Scene):
         self.starting_order_radio_gossip.render(screen)
         screen.blit(self.starting_order_radio_gossip_label, (243, 263))
 
-        pygame.draw.line(screen, (251, 164, 98), (16, 306), (934, 306), 5)
-        gfxdraw.filled_circle(screen, 16, 306, 2, (251, 164, 98))
-        gfxdraw.aacircle(screen, 16, 306, 2, (251, 164, 98))
-        gfxdraw.filled_circle(screen, 934, 306, 2, (251, 164, 98))
-        gfxdraw.aacircle(screen, 934, 306, 2, (251, 164, 98))
+        pygame.draw.line(screen, (247, 95, 23), (16, 306), (934, 306), 5)
+        gfxdraw.filled_circle(screen, 16, 306, 2, (247, 95, 23))
+        gfxdraw.aacircle(screen, 16, 306, 2, (247, 95, 23))
+        gfxdraw.filled_circle(screen, 934, 306, 2, (247, 95, 23))
+        gfxdraw.aacircle(screen, 934, 306, 2, (247, 95, 23))
 
         screen.blit(self.events_file_name_label, (16, 330))
         self.events_file_name_input.render(screen)
@@ -205,11 +205,11 @@ class SelectAgentsScene(Scene):
         screen.blit(self.start_time_label, (744, 369))
         self.start_time_input.render(screen)
 
-        pygame.draw.line(screen, (251, 164, 98), (16, 411), (934, 411), 5)
-        gfxdraw.filled_circle(screen, 16, 411, 2, (251, 164, 98))
-        gfxdraw.aacircle(screen, 16, 411, 2, (251, 164, 98))
-        gfxdraw.filled_circle(screen, 934, 411, 2, (251, 164, 98))
-        gfxdraw.aacircle(screen, 934, 411, 2, (251, 164, 98))
+        pygame.draw.line(screen, (247, 95, 23), (16, 411), (934, 411), 5)
+        gfxdraw.filled_circle(screen, 16, 411, 2, (247, 95, 23))
+        gfxdraw.aacircle(screen, 16, 411, 2, (247, 95, 23))
+        gfxdraw.filled_circle(screen, 934, 411, 2, (247, 95, 23))
+        gfxdraw.aacircle(screen, 934, 411, 2, (247, 95, 23))
 
         screen.blit(self.generation_range_label, (16, 431))
         screen.blit(self.min_generation_range_label, (16, 472))
@@ -217,9 +217,9 @@ class SelectAgentsScene(Scene):
         screen.blit(self.max_generation_range_label, (16, 511))
         self.max_generation_range_input.render(screen)
 
-        pygame.draw.line(screen, (251, 164, 98), (421, 412), (421, 534), 5)
-        gfxdraw.filled_circle(screen, 421, 534, 2, (251, 164, 98))
-        gfxdraw.aacircle(screen, 421, 534, 2, (251, 164, 98))
+        pygame.draw.line(screen, (247, 95, 23), (421, 412), (421, 534), 5)
+        gfxdraw.filled_circle(screen, 421, 534, 2, (247, 95, 23))
+        gfxdraw.aacircle(screen, 421, 534, 2, (247, 95, 23))
 
         screen.blit(self.image_score_range_label, (493, 431))
         screen.blit(self.min_image_score_range_label, (493, 472))

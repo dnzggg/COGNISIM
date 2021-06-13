@@ -79,27 +79,29 @@ class Blob:
             pygame.draw.rect(screen, (112, 112, 112), (self.pos[0] + 7, self.pos[1] - 27, w + 6, 20), border_radius=3)
             screen.blit(text, (self.pos[0] + 10, self.pos[1] - 27))
 
-    def update(self, playing=False):
+    def update(self, gossiping=False, giver=False, receiver=False):
         """Update the color of the agent
 
         Parameters
         ----------
-        playing: bool
-            stores if the agent is playing or not
-        watching: bool
-            stores if the agent is watching or not
         gossiping: bool
+            stores if the agent is playing or not
+        giver: bool
+            stores if the agent is watching or not
+        receiver: bool
             stores if the agent is gossiping or not
         """
         if self.player:
             self.color = (0, 255, 0, 100)
-            if playing:
-                # self.color = (255, 255, 0)
+            if gossiping:
                 self.color = (0, 255, 0)
+            if giver:
+                self.color = (255, 255, 0)
+            if receiver:
+                self.color = (255, 0, 255)
         else:
             self.color = (255, 0, 0, 100)
-            if playing:
-                # self.color = (255, 0, 255)
+            if gossiping:
                 self.color = (255, 0, 0)
 
     def handle_events(self, event, agent):
