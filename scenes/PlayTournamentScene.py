@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from objects import Blob, Button, RadioButton, Scene, DropdownItem, Slider, MessageBox, PositionDict
+from objects import Blob, Button, Scene, DropdownItem, Slider, MessageBox, PositionDict
 
 from components import Tournament
 
@@ -24,8 +24,6 @@ class PlayTournamentScene(Scene):
     ----------
     font: pygame.font.Font
         Font that is to be used in this scene
-    tournament_manager: TournamentManager
-        TournamentManager that takes control of switching between tournaments
     running: bool
         Store if the simulation is running or not
     was_running: bool
@@ -44,50 +42,12 @@ class PlayTournamentScene(Scene):
         List of agents
     playing_agents: list
         List of playing agents
-    gossiping_agents: list
-        List of gossiping agents
-    watching_agents: list
-        List of watching agents
-    dr_rb: RadioButton
-        Direct reciprocity radio button
-    ir_rb: RadioButton
-        Indirect reciprocity radio button
-    true_rb: RadioButton
-        Radio button for showing that agents having an option to chose if they want to play is true
-    false_rb: RadioButton
-        Radio button for showing that agents having an option to chose if they want to play is false
-    start_stop_button: Button
-        Button object to handle if the simulation is running or not
-    next_step_button: Button
-        Button object to get the next step if the simulation is not running
     reset_button: Button
         Button object to reset the game (return to the previous page)
     speed_slider: Slider
         Slider object to handle the simulation speed
-    see_average_cooperation_button: Button
-        Button to see statistics
-    see_overall_payoff_button: Button
-        Button to see statistics
-    see_overall_payoff_agents_button: Button
-        Button to see statistics
-    see_number_of_agents_in_generation: Button
-        Button to see statistics
-    overall_payoff_by_round: list
-        list of payoff amount every round (for displaying the graph)
-    round: list
-        list of round numbers (for displaying the graph)
-    average_cooperation_by_round: list
-        list of average cooperation every round (for displaying the graph)
-    overall_payoff_agents_by_round: dict
-        dictionary that stores distinct agent types payoff amount every round  (for displaying the graph)
-    number_of_each_agent: dict
-        dictionary that stores how many each distinct agent type has per round (for displaying the graph)
     message_box: MessageBox
         MessageBox object to ask the user if they want to continue to the next components
-    selection1_rb: RadioButton
-        First selection process radio button
-    selection2_rb: RadioButton
-        Second selection process radio button
 
     Methods
     -------
@@ -103,13 +63,10 @@ class PlayTournamentScene(Scene):
         Creates a Graph object, adds it to the list of graphs
     """
     def __init__(self):
-        """
-        Parameters
-        ----------
-        tournament_manager: TournamentManager
-            TournamentManager that takes control of switching between tournaments
-        """
         Scene.__init__(self)
+        size = pygame.display.get_window_size()
+        pygame.display.set_mode((size[0], size[1]), pygame.RESIZABLE)
+
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
 
@@ -121,6 +78,7 @@ class PlayTournamentScene(Scene):
         self.playing_agents = None
 
         self.running = False
+        self.was_running = False
         self.new_generation = False
         self.generation = self.tournament.generation
         self.total_generations = self.tournament.total_generations
@@ -149,9 +107,66 @@ class PlayTournamentScene(Scene):
 
         self.message_box = MessageBox(400, 133)
 
+        self.shift = False
+        self.check_shift = True
+        self.max_shift = None
+        self.min_shift_x = None
+        self.min_shift_y = None
+        self.shift_x = 0
+        self.shift_y = 0
+        self.border = 0
+
+        self.zoom = 100
+        self.min_zoom = 25
+        self.max_zoom = 400
+        self.simulation_size_w_padding = None
+        self.simulation_size_wo_padding = None
+
     def render(self, screen):
         """Renders the blobs, buttons, radio buttons, labels and lines"""
         Scene.render(self, screen)
+
+        pos1 = pos2 = None
+        if self.tournament.receiver_agent and self.tournament.giver_agent:
+            pos1 = self.blobs[self.tournament.receiver_agent].get_pos()
+            pos2 = self.blobs[self.tournament.giver_agent].get_pos()
+        if self.tournament.gossiping_agents:
+            pos1 = self.blobs[self.tournament.gossiping_agents[0]].get_pos()
+            pos2 = self.blobs[self.tournament.gossiping_agents[1]].get_pos()
+
+        render_after = []
+        for agent in self.blobs:
+            # if 0 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[0] < 950 + self.blobs[agent].radius / 2:
+            #     if 87 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[1] < 550 + self.blobs[agent].radius / 2:
+            if self.blobs[agent].show_name:
+                render_after.append(agent)
+            if agent in [self.tournament.giver_agent, self.tournament.receiver_agent]:
+                render_after.append(agent)
+            if agent in self.tournament.gossiping_agents:
+                render_after.append(agent)
+            self.blobs[agent].render(screen)
+
+        if pos1 and pos2:
+            color = (255, 255, 255)
+            if self.tournament.encounter_type == "Gossip":
+                if self.tournament.gossip:
+                    color = (0, 0, 255)
+            else:
+                if self.tournament.cooperate is not None:
+                    if self.tournament.cooperate:
+                        color = (0, 255, 0)
+                    else:
+                        color = (255, 0, 0)
+            pygame.draw.aaline(screen, color, (pos1[0] - 2, pos1[1]), (pos2[0] - 2, pos2[1]), blend=100)
+            pygame.draw.aaline(screen, color, (pos1[0] - 1, pos1[1]), (pos2[0] - 1, pos2[1]), blend=100)
+            pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
+            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 1), (pos2[0], pos2[1] - 1), blend=100)
+            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 2), (pos2[0], pos2[1] - 2), blend=100)
+
+        for ra in render_after:
+            self.blobs[ra].render(screen)
+
+        pygame.draw.rect(screen, (30, 30, 30), (0, 0, 100000, 85))
 
         self.home_tab.render(screen)
         self.info_tab.render(screen)
@@ -192,49 +207,10 @@ class PlayTournamentScene(Scene):
                                                      True, (255, 255, 255))
             screen.blit(encounter_type_label, (544, 58))
 
-        pygame.draw.line(screen, (247, 95, 23), (0, 85), (950, 85), 2)
-        # pygame.draw.line(screen, (251, 164, 98), (0, 174), (284, 174), 3)
-        # pygame.draw.line(screen, (251, 164, 98), (283, 0), (283, 175), 3)
-        # pygame.draw.line(screen, (251, 164, 98), (283, 105), (950, 105), 3)
-        # pygame.draw.line(screen, (251, 164, 98), (575, 0), (575, 105), 3)
+        pygame.draw.line(screen, (247, 95, 23), (0, 85), (100000, 85), 2)
 
-        pos1 = pos2 = None
-        if self.tournament.receiver_agent and self.tournament.giver_agent:
-            pos1 = self.blobs[self.tournament.receiver_agent].pos
-            pos2 = self.blobs[self.tournament.giver_agent].pos
-        if self.tournament.gossiping_agents:
-            pos1 = self.blobs[self.tournament.gossiping_agents[0]].pos
-            pos2 = self.blobs[self.tournament.gossiping_agents[1]].pos
-
-        render_after = []
-        for agent in self.blobs:
-            if self.blobs[agent].show_name:
-                render_after.append(agent)
-            if agent in [self.tournament.giver_agent, self.tournament.receiver_agent]:
-                render_after.append(agent)
-            if agent in self.tournament.gossiping_agents:
-                render_after.append(agent)
-            self.blobs[agent].render(screen, agent)
-
-        if pos1 and pos2:
-            color = (255, 255, 255)
-            if self.tournament.encounter_type == "Gossip":
-                if self.tournament.gossip:
-                    color = (0, 0, 255)
-            else:
-                if self.tournament.cooperate is not None:
-                    if self.tournament.cooperate:
-                        color = (0, 255, 0)
-                    else:
-                        color = (255, 0, 0)
-            pygame.draw.aaline(screen, color, (pos1[0]-2, pos1[1]), (pos2[0]-2, pos2[1]), blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0]-1, pos1[1]), (pos2[0]-1, pos2[1]), blend=100)
-            pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0], pos1[1]-1), (pos2[0], pos2[1]-1), blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0], pos1[1]-2), (pos2[0], pos2[1]-2), blend=100)
-
-        for ra in render_after:
-            self.blobs[ra].render(screen, ra)
+        pygame.draw.line(screen, (247, 95, 23), (950, 85), (950, 550), 2)
+        pygame.draw.line(screen, (247, 95, 23), (0, 550), (950, 550), 2)
 
         if self.new_generation:
             self.message_box.render(screen, "Do you want to continue to a new tournament?")
@@ -265,40 +241,47 @@ class PlayTournamentScene(Scene):
                 pygame.quit()
                 exit(0)
         else:
+            length = len(self.agents) + len(self.conductors)
+            size = (38, 18)
+            shift = 0
+            while length > size[0] * size[1]:
+                size = size[0] + 2, size[1] + 2
+                shift += 1
+
+            w = int(25 * self.zoom / 100)
+            self.border = shift * w
+            self.max_shift = (shift + 2) * w
+            self.simulation_size_w_padding = (size[0] + 2) * w, (size[1] + 2) * w
+            self.simulation_size_wo_padding = size[0] * w, size[1] * w
+            self.min_shift_x = -self.simulation_size_w_padding[0] + 950 + shift * w
+            self.min_shift_y = -self.simulation_size_w_padding[1] + 465 + shift * w
+
             if self.blobs:
+                self.blobs[self.conductors[0]].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                 for agent in self.agents:
                     if agent == self.tournament.giver_agent:
-                        self.blobs[agent].update(giver=True)
+                        self.blobs[agent].update(giver=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                         continue
                     if agent == self.tournament.receiver_agent:
-                        self.blobs[agent].update(receiver=True)
+                        self.blobs[agent].update(receiver=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                         continue
                     if agent in self.tournament.gossiping_agents:
-                        self.blobs[agent].update(gossiping=True)
+                        self.blobs[agent].update(gossiping=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                         continue
-                    self.blobs[agent].update()
+                    self.blobs[agent].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
             else:
-                positions = PositionDict()
-                # positions[(range(0, 295), range(80, 185))] = ""
-                x = 474
-                y = 317
-                positions[(range(x - 16, x + 16), range(y - 16, y + 16))] = ""
-                self.blobs[self.conductors[0]] = Blob((x, y), conductor=True)
-                for agent in self.agents:
-                    x = random.randrange(10, 940)
-                    y = random.randrange(95, 540)
-                    cont = True
-                    while cont:
-                        try:
-                            if positions[(x, y)] == "":
-                                x = random.randrange(10, 940)
-                                y = random.randrange(95, 540)
-                        except KeyError:
-                            cont = False
+                self.min_zoom = int(465 / self.simulation_size_w_padding[1] * 100)
 
-                    positions[(range(x - 16, x + 16), range(y - 16, y + 16))] = ""
-                    self.blobs[agent] = Blob((x, y), player=True)
-                del positions
+                x = y = -shift
+                for agent in self.agents:
+                    if x == int(size[0] / 2) - shift and y == int(size[1] / 2) - shift:
+                        self.blobs[self.conductors[0]] = Blob((x, y), w, 20, self.conductors[0], conductor=True)
+                        x += 1
+                    self.blobs[agent] = Blob((x, y), w, 20, agent, player=True)
+                    x += 1
+                    if x == size[0] - shift:
+                        x = -shift
+                        y += 1
 
         self.speed_slider.update()
         if int(self.speed_slider.number) != self.speed:
@@ -313,13 +296,12 @@ class PlayTournamentScene(Scene):
         if the slider is changed, changes the speed; if the reset button is pressed, goes back to the select agents
         scene; when the graph buttons are pressed, calls the plot_graph function"""
         Scene.handle_events(self, events)
-
         for event in events:
             if not self.message_box.handle_events(event):
                 self.speed_slider.handle_events(event)
 
                 for agent in self.blobs:
-                    self.blobs[agent].handle_events(event, agent)
+                    self.blobs[agent].handle_events(event)
 
                 if self.reset_button.handle_events(event):
                     self.manager.go_to(self.manager.previous)
@@ -338,6 +320,54 @@ class PlayTournamentScene(Scene):
                         self.new_generation = True
                         self.was_running = self.running
                         self.running = False
+
+                if self.check_shift:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 2:
+                            self.shift = True
+
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        self.shift = False
+
+                    if event.type == pygame.MOUSEMOTION:
+                        if self.shift:
+                            self.shift_x += event.rel[0]
+                            self.shift_y += event.rel[1]
+
+                    if self.shift_x < self.min_shift_x:
+                        self.shift_x = self.min_shift_x
+                    if self.shift_x > self.max_shift:
+                        self.shift_x = self.max_shift
+
+                    if self.shift_y < self.min_shift_y:
+                        self.shift_y = self.min_shift_y
+                    if self.shift_y > self.max_shift:
+                        self.shift_y = self.max_shift
+
+                if event.type == pygame.MOUSEWHEEL:
+                    self.check_shift = True
+                    if event.y != 0:
+                        if self.zoom <= 200:
+                            self.zoom += 25 * event.y
+                        else:
+                            self.zoom += 100 * event.y
+
+                    mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1] - 87
+                    simulation_pos = mouse_pos[0] * 950 / self.simulation_size_w_padding[0]
+                    print(self.simulation_size_wo_padding[0], simulation_pos)
+
+                    if self.zoom > self.max_zoom:
+                        self.zoom = self.max_zoom
+                    if self.zoom < self.min_zoom:
+                        self.zoom = self.min_zoom
+                    if self.zoom <= self.min_zoom:
+                        shift_x = int((950 - self.simulation_size_w_padding[0]) / 2) + self.max_shift
+                        shift_y = int((465 - self.simulation_size_w_padding[1]) / 2) + self.max_shift
+                        self.min_shift_x = shift_x - 1
+                        self.max_shift = shift_x + 1
+                        self.shift_x = shift_x
+                        self.shift_y = shift_y
+                        self.check_shift = False
 
                 if event.type == pygame.KEYDOWN:
                     if pygame.key.get_mods() and pygame.KMOD_ALT:
