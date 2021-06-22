@@ -346,21 +346,18 @@ class PlayTournamentScene(Scene):
 
                 if event.type == pygame.MOUSEWHEEL:
                     self.check_shift = True
+                    zoom = self.zoom
                     if event.y != 0:
                         if self.zoom <= 200:
                             self.zoom += 25 * event.y
                         else:
                             self.zoom += 100 * event.y
 
-                    mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1] - 87
-                    simulation_pos = mouse_pos[0] * 950 / self.simulation_size_w_padding[0]
-                    print(self.simulation_size_wo_padding[0], simulation_pos)
-
                     if self.zoom > self.max_zoom:
                         self.zoom = self.max_zoom
-                    if self.zoom < self.min_zoom:
+                    elif self.zoom <= self.min_zoom:
                         self.zoom = self.min_zoom
-                    if self.zoom <= self.min_zoom:
+                        zoom = self.zoom
                         shift_x = int((950 - self.simulation_size_w_padding[0]) / 2) + self.max_shift
                         shift_y = int((465 - self.simulation_size_w_padding[1]) / 2) + self.max_shift
                         self.min_shift_x = shift_x - 1
@@ -368,6 +365,16 @@ class PlayTournamentScene(Scene):
                         self.shift_x = shift_x
                         self.shift_y = shift_y
                         self.check_shift = False
+                    if zoom != self.zoom:
+                        mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1] - 87
+                        new_pos = mouse_pos[0] * self.zoom / 100, mouse_pos[1] * self.zoom / 100
+                        self.shift_x = int(mouse_pos[0] - new_pos[0])
+                        print(self.simulation_size_wo_padding[0], mouse_pos[0])
+                        self.shift_y = int(mouse_pos[1] - new_pos[1])
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()[0] - self.shift_x, pygame.mouse.get_pos()[1] - 87 - self.shift_y
+                    new_pos = mouse_pos[0] * self.zoom / 100, mouse_pos[1] * self.zoom / 100
 
                 if event.type == pygame.KEYDOWN:
                     if pygame.key.get_mods() and pygame.KMOD_ALT:

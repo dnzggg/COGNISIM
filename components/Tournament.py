@@ -70,7 +70,7 @@ class Tournament:
             name = agent.group(1)
             index = re.search(r"^generation\d+Player(\d+)", name).group(1)
             self._agents.append(Agent(int(index), name))
-            # self._agents.append(Agent(int(index), name))
+            self._agents.append(Agent(int(index), name))
             # self._agents.append(Agent(int(index), name))
             # self._agents.append(Agent(int(index), name))
             # self._agents.append(Agent(int(index), name))
