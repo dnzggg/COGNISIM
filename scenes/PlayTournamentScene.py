@@ -197,15 +197,15 @@ class PlayTournamentScene(Scene):
                 f"{self.tournament.generation} Generation / {self.total_generations} Generations",
                 True, (255, 255, 255))
             screen.blit(generation_label, (16, 35))
-            round_label = self.font2.render(f"{self.tournament.round % self.total_rounds} Round / {self.total_rounds} Rounds",
+            round_label = self.font2.render(f"{self.tournament.round} Round / {self.total_rounds} Rounds",
                                             True, (255, 255, 255))
             screen.blit(round_label, (407, 35))
             giving_encounter_label = self.font2.render(
-                f"{self.tournament.giving_encounters % self.total_giving_encounters} Giving Encounter / {self.total_giving_encounters} Rounds",
+                f"{self.tournament.giving_encounters} Giving Encounter / {self.total_giving_encounters} Rounds",
                 True, (255, 255, 255))
             screen.blit(giving_encounter_label, (664, 35))
             gossip_encounter_label = self.font2.render(
-                f"{self.tournament.gossip_encounters % self.total_gossip_encounters} Gossip Encounter / {self.total_gossip_encounters} Rounds",
+                f"{self.tournament.gossip_encounters} Gossip Encounter / {self.total_gossip_encounters} Rounds",
                 True, (255, 255, 255))
             screen.blit(gossip_encounter_label, (200, 58))
             encounter_type_label = self.font2.render(f"Encounter type: {self.tournament.encounter_type}",
