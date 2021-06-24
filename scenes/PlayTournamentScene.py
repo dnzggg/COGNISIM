@@ -89,7 +89,7 @@ class PlayTournamentScene(Scene):
 
         self.UPDATE = pygame.USEREVENT + 1
         self.speed = 99
-        pygame.time.set_timer(self.UPDATE, self.speed)
+        pygame.time.set_timer(self.UPDATE, self.speed, True)
 
         self.tab = 0
         self.home_tab = DropdownItem(pygame.Rect(18, 8, 47, 19), 0, "Home", underline=0, font=15, center=False)
@@ -302,7 +302,6 @@ class PlayTournamentScene(Scene):
         self.speed_slider.update()
         if int(self.speed_slider.number) != self.speed:
             self.speed = int(self.speed_slider.number)
-            pygame.time.set_timer(self.UPDATE, self.speed)
 
         self.home_tab.update(self.tab == self.home_tab.index)
         self.info_tab.update(self.tab == self.info_tab.index)
@@ -312,8 +311,15 @@ class PlayTournamentScene(Scene):
         if the slider is changed, changes the speed; if the reset button is pressed, goes back to the select agents
         scene; when the graph buttons are pressed, calls the plot_graph function"""
         Scene.handle_events(self, events)
-
         for event in events:
+            if event.type == self.UPDATE:
+                pygame.time.set_timer(self.UPDATE, self.speed, True)
+                if self.running:
+                    if next(self.run):
+                        self.new_generation = True
+                        self.was_running = self.running
+                        self.running = False
+
             if not self.message_box.handle_events(event):
                 self.speed_slider.handle_events(event)
 
@@ -325,12 +331,6 @@ class PlayTournamentScene(Scene):
 
                 if self.start_stop_button.handle_events(event):
                     self.running = not self.running
-
-                if event.type == self.UPDATE and self.running:
-                    if next(self.run):
-                        self.new_generation = True
-                        self.was_running = self.running
-                        self.running = False
 
                 if self.next_button.handle_events(event):
                     if next(self.run):
