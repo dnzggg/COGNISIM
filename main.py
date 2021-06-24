@@ -1,12 +1,13 @@
 import os
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import tkinter
+
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
+os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
 
 import pygame
 
+from objects import QuitException
 from objects.SceneManager import SceneManager
-
-os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
 
 
 class Screen:
@@ -62,11 +63,15 @@ class Screen:
                     temp.pop(graph)
                 self.manager.graphs[graph].update()
             self.manager.graphs = temp
-            self.manager.scene.handle_events(pygame.event.get())
+            try:
+                self.manager.scene.handle_events(pygame.event.get())
+            except QuitException:
+                self.__cont = False
+                continue
             self.manager.scene.update()
             self.manager.scene.render(self.__screen)
             self.manager.scene.clock.tick(144)
-            pygame.display.flip()
+            pygame.display.update()
 
         main_dialog.destroy()
 
@@ -75,3 +80,5 @@ if __name__ == "__main__":
     pygame.init()
     screen = Screen(950, 550)
     screen.start()
+    pygame.display.quit()
+    pygame.quit()

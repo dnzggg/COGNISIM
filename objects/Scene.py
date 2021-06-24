@@ -1,5 +1,7 @@
 import pygame
 
+from .QuitException import QuitException
+
 
 class Scene(object):
     """Scene superclass where every scene is created using this class.
@@ -51,6 +53,5 @@ class Scene(object):
             pygame events
         """
         for e in events:
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE or e.type == pygame.QUIT:
-                pygame.quit()
-                exit(0)
+            if (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE) or e.type == pygame.QUIT:
+                raise QuitException

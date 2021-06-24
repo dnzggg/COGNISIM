@@ -69,6 +69,7 @@ class PlayTournamentScene(Scene):
 
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
+        self.font3 = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 15)
 
         self.tournament = Tournament()
         self.run = self.tournament.start()
@@ -117,8 +118,11 @@ class PlayTournamentScene(Scene):
         self.border = 0
 
         self.zoom = 100
+        self.show_zoom = False
+        self.BACK_TO_NORMAL = pygame.USEREVENT + 2
         self.min_zoom = 25
         self.max_zoom = 400
+
         self.simulation_size_w_padding = None
         self.simulation_size_wo_padding = None
 
@@ -136,15 +140,16 @@ class PlayTournamentScene(Scene):
 
         render_after = []
         for agent in self.blobs:
-            # if 0 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[0] < 950 + self.blobs[agent].radius / 2:
-            #     if 87 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[1] < 550 + self.blobs[agent].radius / 2:
-            if self.blobs[agent].show_name:
-                render_after.append(agent)
-            if agent in [self.tournament.giver_agent, self.tournament.receiver_agent]:
-                render_after.append(agent)
-            if agent in self.tournament.gossiping_agents:
-                render_after.append(agent)
-            self.blobs[agent].render(screen)
+            w, h = pygame.display.get_window_size()
+            if 0 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[0] < w + self.blobs[agent].radius / 2:
+                if 87 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[1] < h + self.blobs[agent].radius / 2:
+                    if self.blobs[agent].show_name:
+                        render_after.append(agent)
+                    if agent in [self.tournament.giver_agent, self.tournament.receiver_agent]:
+                        render_after.append(agent)
+                    if agent in self.tournament.gossiping_agents:
+                        render_after.append(agent)
+                    self.blobs[agent].render(screen)
 
         if pos1 and pos2:
             color = (255, 255, 255)
@@ -209,8 +214,9 @@ class PlayTournamentScene(Scene):
 
         pygame.draw.line(screen, (247, 95, 23), (0, 85), (100000, 85), 2)
 
-        pygame.draw.line(screen, (247, 95, 23), (950, 85), (950, 550), 2)
-        pygame.draw.line(screen, (247, 95, 23), (0, 550), (950, 550), 2)
+        if self.show_zoom:
+            zoom_label = self.font3.render(f"Zoom: {self.zoom}%", True, (255, 255, 255))
+            screen.blit(zoom_label, (840, 97))
 
         if self.new_generation:
             self.message_box.render(screen, "Do you want to continue to a new tournament?")
@@ -281,7 +287,6 @@ class PlayTournamentScene(Scene):
                 self.min_shift_y = -self.simulation_size_w_padding[1] + 465 + shift * w
                 self.min_zoom = int(465 / self.simulation_size_w_padding[1] * 100)
                 self.zoom = zoom
-                print(self.min_zoom, self.zoom, self.max_zoom)
 
                 x = y = -shift
                 for agent in self.agents:
@@ -307,6 +312,7 @@ class PlayTournamentScene(Scene):
         if the slider is changed, changes the speed; if the reset button is pressed, goes back to the select agents
         scene; when the graph buttons are pressed, calls the plot_graph function"""
         Scene.handle_events(self, events)
+
         for event in events:
             if not self.message_box.handle_events(event):
                 self.speed_slider.handle_events(event)
@@ -380,12 +386,13 @@ class PlayTournamentScene(Scene):
                         mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1] - 87
                         new_pos = mouse_pos[0] * self.zoom / 100, mouse_pos[1] * self.zoom / 100
                         self.shift_x = int(mouse_pos[0] - new_pos[0])
-                        print(self.simulation_size_wo_padding[0], mouse_pos[0])
                         self.shift_y = int(mouse_pos[1] - new_pos[1])
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pos = pygame.mouse.get_pos()[0] - self.shift_x, pygame.mouse.get_pos()[1] - 87 - self.shift_y
-                    new_pos = mouse_pos[0] * self.zoom / 100, mouse_pos[1] * self.zoom / 100
+                    self.show_zoom = True
+                    pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+
+                if event.type == self.BACK_TO_NORMAL:
+                    self.show_zoom = False
 
                 if event.type == pygame.KEYDOWN:
                     if pygame.key.get_mods() and pygame.KMOD_ALT:
