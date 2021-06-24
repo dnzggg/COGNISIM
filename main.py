@@ -78,6 +78,7 @@ class Screen:
 
 if __name__ == "__main__":
     pygame.init()
+    pygame.display.init()
     screen = Screen(950, 550)
     screen.start()
     pygame.display.quit()
