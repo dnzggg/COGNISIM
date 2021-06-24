@@ -270,7 +270,18 @@ class PlayTournamentScene(Scene):
                         continue
                     self.blobs[agent].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
             else:
+                zoom = self.zoom
+                self.zoom = 100
+                w = int(25 * self.zoom / 100)
+                self.border = shift * w
+                self.max_shift = (shift + 2) * w
+                self.simulation_size_w_padding = (size[0] + 2) * w, (size[1] + 2) * w
+                self.simulation_size_wo_padding = size[0] * w, size[1] * w
+                self.min_shift_x = -self.simulation_size_w_padding[0] + 950 + shift * w
+                self.min_shift_y = -self.simulation_size_w_padding[1] + 465 + shift * w
                 self.min_zoom = int(465 / self.simulation_size_w_padding[1] * 100)
+                self.zoom = zoom
+                print(self.min_zoom, self.zoom, self.max_zoom)
 
                 x = y = -shift
                 for agent in self.agents:
