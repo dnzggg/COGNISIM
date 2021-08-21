@@ -321,22 +321,23 @@ class PlayTournamentScene(Scene):
                         self.running = False
 
             if not self.message_box.handle_events(event):
-                self.speed_slider.handle_events(event)
-
                 for agent in self.blobs:
                     self.blobs[agent].handle_events(event)
 
-                if self.reset_button.handle_events(event):
-                    self.manager.go_to(self.manager.previous)
+                if self.tab == 0:
+                    self.speed_slider.handle_events(event)
 
-                if self.start_stop_button.handle_events(event):
-                    self.running = not self.running
+                    if self.reset_button.handle_events(event):
+                        self.manager.go_to(self.manager.previous)
 
-                if self.next_button.handle_events(event):
-                    if next(self.run):
-                        self.new_generation = True
-                        self.was_running = self.running
-                        self.running = False
+                    if self.start_stop_button.handle_events(event):
+                        self.running = not self.running
+
+                    if self.next_button.handle_events(event):
+                        if next(self.run):
+                            self.new_generation = True
+                            self.was_running = self.running
+                            self.running = False
 
                 if self.check_shift:
                     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -389,7 +390,7 @@ class PlayTournamentScene(Scene):
                         self.shift_y = int(mouse_pos[1] - new_pos[1])
 
                     self.show_zoom = True
-                    pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+                    pygame.time.set_timer(self.BACK_TO_NORMAL, 600, True)
 
                 if event.type == self.BACK_TO_NORMAL:
                     self.show_zoom = False
