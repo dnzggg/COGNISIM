@@ -2,6 +2,7 @@ import pygame
 
 from objects import Background, Button, Scene
 from .SelectAgentsScene import SelectAgentsScene
+from .PlayTournamentScene import PlayTournamentScene
 
 
 class StartScene(Scene):
@@ -47,7 +48,6 @@ class StartScene(Scene):
         title = self.font.render("Cooperative Agents in Multi-agent Systems", True, (226, 215, 215))
         screen.blit(title, (31, 122))
 
-
     def update(self):
         """Just to pass the superclass notimplemented error"""
         pass
@@ -59,6 +59,6 @@ class StartScene(Scene):
         for event in events:
             self.button.handle_events(event)
             if event.type == pygame.KEYDOWN:
-                self.manager.go_to(SelectAgentsScene())
+                self.manager.go_to(PlayTournamentScene())
             if self.button.handle_events(event):
-                self.manager.go_to(SelectAgentsScene())
+                self.manager.go_to(PlayTournamentScene())

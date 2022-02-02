@@ -5,15 +5,15 @@ from .Agent import Agent
 class Tournament:
     def __init__(self, file_name="./trail1eventHistory.pl"):
         self.file_name = file_name
-        self.round = 0
-        self.time_stamp = 0
         self.total_rounds = 0
-        self.gossip_encounters = 0
-        self.total_gossip_encounters = 0
-        self.giving_encounters = 0
         self.total_giving_encounters = 0
-        self.generation = 0
+        self.total_gossip_encounters = 0
         self.total_generations = None
+        self.time_stamp = 0
+        self.giving_encounters = 0
+        self.gossip_encounters = 0
+        self.round = 0
+        self.generation = 0
         self.encounter_type = "Gossip"
         self._agents = []
         self._conductors = []

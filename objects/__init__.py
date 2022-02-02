@@ -1,7 +1,7 @@
 """Module for objects of the project."""
 
 __all__ = ["Scene", "SceneManager", "Button", "Background", "Chip", "HorizontalScroll", "DropdownItem", "QuitException",
-           "RadioButton", "InputBox", "Blob", "ImageButton", "Slider", "MessageBox", "PositionDict", "Dropdown"]
+           "RadioButton", "InputBox", "Blob", "ImageButton", "Slider", "MessageBox", "PositionDict", "Dropdown", "Timeline"]
 
 from .Background import Background
 from .Blob import Blob
@@ -18,3 +18,4 @@ from .Dropdown import Dropdown
 from .Chip import Chip
 from .HorizontalScroll import HorizontalScroll
 from .QuitException import QuitException
+from .Timeline import Timeline

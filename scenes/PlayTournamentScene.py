@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from objects import Blob, Button, Scene, DropdownItem, Slider, MessageBox, PositionDict
+from objects import Blob, Button, Scene, DropdownItem, Slider, MessageBox, PositionDict, Timeline
 
 from components import Tournament
 
@@ -46,8 +46,6 @@ class PlayTournamentScene(Scene):
         Button object to reset the game (return to the previous page)
     speed_slider: Slider
         Slider object to handle the simulation speed
-    message_box: MessageBox
-        MessageBox object to ask the user if they want to continue to the next components
 
     Methods
     -------
@@ -81,7 +79,6 @@ class PlayTournamentScene(Scene):
         self.running = False
         self.was_running = False
         self.new_generation = False
-        self.generation = self.tournament.generation
         self.total_generations = self.tournament.total_generations
         self.total_rounds = self.tournament.total_rounds
         self.total_giving_encounters = self.tournament.total_giving_encounters
@@ -106,8 +103,6 @@ class PlayTournamentScene(Scene):
         self.speed_inside_im = pygame.transform.smoothscale(self.speed_inside_im, (15, 15))
         self.speed_slider = Slider((465, 57), 240, fro=5, to=100)
 
-        self.message_box = MessageBox(400, 133)
-
         self.shift = False
         self.check_shift = True
         self.max_shift = None
@@ -125,6 +120,8 @@ class PlayTournamentScene(Scene):
 
         self.simulation_size_w_padding = None
         self.simulation_size_wo_padding = None
+
+        self.timeline = Timeline(rounds=self.total_rounds)
 
     def render(self, screen):
         """Renders the blobs, buttons, radio buttons, labels and lines"""
@@ -218,34 +215,17 @@ class PlayTournamentScene(Scene):
             zoom_label = self.font3.render(f"Zoom: {self.zoom}%", True, (255, 255, 255))
             screen.blit(zoom_label, (840, 97))
 
-        if self.new_generation:
-            self.message_box.render(screen, "Do you want to continue to a new tournament?")
+        self.timeline.render(screen)
 
     def update(self):
-        """Updates the blobs status, messagebox, and slider"""
+        """Updates the blobs' status, and slider"""
         self.agents = self.tournament.get_agents()
         self.conductors = self.tournament.get_conductors()
 
         if self.new_generation:
-            if self.message_box.ask_again:
-                self.message_box.show = True
-            else:
-                self.running = self.was_running
-                self.new_generation = False
-                self.message_box.show = False
-                self.message_box.answer = ""
-                self.blobs = dict()
-            if self.message_box.answer == "yes":
-                self.running = self.was_running
-                self.new_generation = False
-                self.message_box.show = False
-                self.message_box.answer = ""
-                self.blobs = dict()
-            elif self.message_box.answer == "":
-                pass
-            else:
-                pygame.quit()
-                exit(0)
+            self.running = self.was_running
+            self.new_generation = False
+            self.blobs = dict()
         else:
             length = len(self.agents) + len(self.conductors)
             size = (38, 18)
@@ -306,6 +286,8 @@ class PlayTournamentScene(Scene):
         self.home_tab.update(self.tab == self.home_tab.index)
         self.info_tab.update(self.tab == self.info_tab.index)
 
+        self.timeline.update(self.tournament.round)
+
     def handle_events(self, events):
         """If the start button is pressed, starts the simulation; if the next button is pressed, gets the next round;
         if the slider is changed, changes the speed; if the reset button is pressed, goes back to the select agents
@@ -320,96 +302,98 @@ class PlayTournamentScene(Scene):
                         self.was_running = self.running
                         self.running = False
 
-            if not self.message_box.handle_events(event):
-                for agent in self.blobs:
-                    self.blobs[agent].handle_events(event)
+            for agent in self.blobs:
+                self.blobs[agent].handle_events(event)
 
-                if self.tab == 0:
-                    self.speed_slider.handle_events(event)
+            if self.tab == 0:
+                self.speed_slider.handle_events(event)
 
-                    if self.reset_button.handle_events(event):
-                        self.manager.go_to(self.manager.previous)
+                if self.reset_button.handle_events(event):
+                    self.manager.go_to(self.manager.previous)
 
-                    if self.start_stop_button.handle_events(event):
-                        self.running = not self.running
+                if self.start_stop_button.handle_events(event):
+                    self.running = not self.running
 
-                    if self.next_button.handle_events(event):
-                        if next(self.run):
-                            self.new_generation = True
-                            self.was_running = self.running
-                            self.running = False
+                if self.next_button.handle_events(event):
+                    if next(self.run):
+                        self.new_generation = True
+                        self.was_running = self.running
+                        self.running = False
 
-                if self.check_shift:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if event.button == 2:
-                            self.shift = True
+            if self.check_shift:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 2:
+                        self.shift = True
 
-                    if event.type == pygame.MOUSEBUTTONUP:
-                        self.shift = False
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.shift = False
 
-                    if event.type == pygame.MOUSEMOTION:
-                        if self.shift:
-                            self.shift_x += event.rel[0]
-                            self.shift_y += event.rel[1]
+                if event.type == pygame.MOUSEMOTION:
+                    if self.shift:
+                        self.shift_x += event.rel[0]
+                        self.shift_y += event.rel[1]
 
-                    if self.shift_x < self.min_shift_x:
-                        self.shift_x = self.min_shift_x
-                    if self.shift_x > self.max_shift:
-                        self.shift_x = self.max_shift
+                if self.shift_x < self.min_shift_x:
+                    self.shift_x = self.min_shift_x
+                if self.shift_x > self.max_shift:
+                    self.shift_x = self.max_shift
 
-                    if self.shift_y < self.min_shift_y:
-                        self.shift_y = self.min_shift_y
-                    if self.shift_y > self.max_shift:
-                        self.shift_y = self.max_shift
+                if self.shift_y < self.min_shift_y:
+                    self.shift_y = self.min_shift_y
+                if self.shift_y > self.max_shift:
+                    self.shift_y = self.max_shift
 
-                if event.type == pygame.MOUSEWHEEL:
-                    self.check_shift = True
+            if event.type == pygame.MOUSEWHEEL:
+                self.check_shift = True
+                zoom = self.zoom
+                if event.y != 0:
+                    if self.zoom <= 200:
+                        self.zoom += 25 * event.y
+                    else:
+                        self.zoom += 100 * event.y
+
+                if self.zoom > self.max_zoom:
+                    self.zoom = self.max_zoom
+                elif self.zoom <= self.min_zoom:
+                    self.zoom = self.min_zoom
                     zoom = self.zoom
-                    if event.y != 0:
-                        if self.zoom <= 200:
-                            self.zoom += 25 * event.y
-                        else:
-                            self.zoom += 100 * event.y
+                    shift_x = int((950 - self.simulation_size_w_padding[0]) / 2) + self.max_shift
+                    shift_y = int((465 - self.simulation_size_w_padding[1]) / 2) + self.max_shift
+                    self.min_shift_x = shift_x - 1
+                    self.max_shift = shift_x + 1
+                    self.shift_x = shift_x
+                    self.shift_y = shift_y
+                    self.check_shift = False
+                if zoom != self.zoom:
+                    mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1] - 87
+                    new_pos = mouse_pos[0] * self.zoom / 100, mouse_pos[1] * self.zoom / 100
+                    self.shift_x = int(mouse_pos[0] - new_pos[0])
+                    self.shift_y = int(mouse_pos[1] - new_pos[1])
 
-                    if self.zoom > self.max_zoom:
-                        self.zoom = self.max_zoom
-                    elif self.zoom <= self.min_zoom:
-                        self.zoom = self.min_zoom
-                        zoom = self.zoom
-                        shift_x = int((950 - self.simulation_size_w_padding[0]) / 2) + self.max_shift
-                        shift_y = int((465 - self.simulation_size_w_padding[1]) / 2) + self.max_shift
-                        self.min_shift_x = shift_x - 1
-                        self.max_shift = shift_x + 1
-                        self.shift_x = shift_x
-                        self.shift_y = shift_y
-                        self.check_shift = False
-                    if zoom != self.zoom:
-                        mouse_pos = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1] - 87
-                        new_pos = mouse_pos[0] * self.zoom / 100, mouse_pos[1] * self.zoom / 100
-                        self.shift_x = int(mouse_pos[0] - new_pos[0])
-                        self.shift_y = int(mouse_pos[1] - new_pos[1])
+                self.show_zoom = True
+                pygame.time.set_timer(self.BACK_TO_NORMAL, 600, True)
 
-                    self.show_zoom = True
-                    pygame.time.set_timer(self.BACK_TO_NORMAL, 600, True)
+            if event.type == self.BACK_TO_NORMAL:
+                self.show_zoom = False
 
-                if event.type == self.BACK_TO_NORMAL:
-                    self.show_zoom = False
+            if event.type == pygame.KEYDOWN:
+                if pygame.key.get_mods() and pygame.KMOD_ALT:
+                    if event.key == pygame.K_h:
+                        self.tab = self.home_tab.index
+                    if event.key == pygame.K_i:
+                        self.tab = self.info_tab.index
+                if event.key == pygame.K_SPACE:
+                    self.running = not self.running
+                if event.key == pygame.K_RIGHT:
+                    if next(self.run):
+                        self.new_generation = True
+                        self.was_running = self.running
+                        self.running = False
 
-                if event.type == pygame.KEYDOWN:
-                    if pygame.key.get_mods() and pygame.KMOD_ALT:
-                        if event.key == pygame.K_h:
-                            self.tab = self.home_tab.index
-                        if event.key == pygame.K_i:
-                            self.tab = self.info_tab.index
-                    if event.key == pygame.K_SPACE:
-                        self.running = not self.running
-                    if event.key == pygame.K_RIGHT:
-                        if next(self.run):
-                            self.new_generation = True
-                            self.was_running = self.running
-                            self.running = False
+            if self.home_tab.handle_events(event):
+                self.tab = self.home_tab.index
+            if self.info_tab.handle_events(event):
+                self.tab = self.info_tab.index
 
-                if self.home_tab.handle_events(event):
-                    self.tab = self.home_tab.index
-                if self.info_tab.handle_events(event):
-                    self.tab = self.info_tab.index
+            if info := self.timeline.handle_events(event):
+                self.tournament.round, self.generation = info

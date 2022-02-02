@@ -96,7 +96,7 @@ class SelectAgentsScene(Scene):
         self.number_of_rounds_input = InputBox((833, 221), w=101, h=27, text="1000")
         self.giving_encounters_label = self.font2.render("Total Giving Encounters:", True, (255, 255, 255))
         self.giving_encounters_input = InputBox((513, 260), w=101, h=27, text="1000")
-        self.gossip_encounters_label = self.font2.render("Total Giving Encounters:", True, (255, 255, 255))
+        self.gossip_encounters_label = self.font2.render("Total Gossip Encounters:", True, (255, 255, 255))
         self.gossip_encounters_input = InputBox((833, 260), w=101, h=27, text="1000")
 
         self.starting_order = True
