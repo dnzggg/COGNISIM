@@ -70,7 +70,7 @@ class PlayTournamentScene(Scene):
         self.font3 = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 15)
 
         self.tournament = Tournament()
-        self.run = self.tournament.start()
+        self.run = self.tournament.run()
         self.agents = self.tournament.get_agents()
         self.conductors = self.tournament.get_conductors()
         self.blobs = dict()
@@ -121,7 +121,7 @@ class PlayTournamentScene(Scene):
         self.simulation_size_w_padding = None
         self.simulation_size_wo_padding = None
 
-        self.timeline = Timeline(rounds=self.total_rounds)
+        self.timeline = Timeline(rounds=self.tournament.total_time_stamp)
 
     def render(self, screen):
         """Renders the blobs, buttons, radio buttons, labels and lines"""
@@ -286,7 +286,7 @@ class PlayTournamentScene(Scene):
         self.home_tab.update(self.tab == self.home_tab.index)
         self.info_tab.update(self.tab == self.info_tab.index)
 
-        self.timeline.update(self.tournament.round)
+        self.timeline.update(self.tournament.time_stamp)
 
     def handle_events(self, events):
         """If the start button is pressed, starts the simulation; if the next button is pressed, gets the next round;
@@ -396,4 +396,4 @@ class PlayTournamentScene(Scene):
                 self.tab = self.info_tab.index
 
             if info := self.timeline.handle_events(event):
-                self.tournament.round, self.generation = info
+                self.tournament.time_stamp, self.tournament.generation = info
