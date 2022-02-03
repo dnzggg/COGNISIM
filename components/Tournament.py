@@ -86,11 +86,10 @@ class Tournament:
                     else:
                         self.find_agents(line, self.time_stamp - 1)
                     if re.search(r"^perform\(.*:" + str(self.time_stamp) + "$", line):
-                        new_generation = False
-                        self.time_stamp += 1
                         yield True
-                        # self.perform_line(line)
-                        # self.time_stamp += 1
+                        new_generation = False
+                        self.perform_line(line)
+                        self.time_stamp += 1
                         yield
             self.generation += 1
             self._agents = []
