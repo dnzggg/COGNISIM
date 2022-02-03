@@ -12,7 +12,7 @@ class Tournament:
         self.total_giving_encounters = 0
         self.total_gossip_encounters = 0
         self.total_generations = None
-        self.time_stamp = 0
+        self.time_stamp = 1
         self.total_time_stamp = 0
         self.giving_encounters = 0
         self.gossip_encounters = 0
@@ -48,7 +48,7 @@ class Tournament:
 
         self.total_rounds = int((int(self.chunks[0][-1].split(":")[1]) / 3) / (self.total_giving_encounters + self.total_gossip_encounters))
         self.total_generations = len(self.chunks)
-        self.total_time_stamp = self.total_generations * int(self.chunks[0][-1].split(":")[1]) / 3
+        self.total_time_stamp = int(self.chunks[0][-1].split(":")[1])
         file.close()
 
     def find_agents(self, line, r):
@@ -63,16 +63,41 @@ class Tournament:
             index = re.search(r"^generation\d+Player(\d+)", name).group(1)
             self._agents.append(Agent(int(index), name))
 
-    def run(self, generation=None, time_stamp=None):
+    def run(self, time_stamp=None, generation=None):
+        new_generation = False
         if generation and time_stamp:
             self.time_stamp = time_stamp
-            self.generation = generation
-        for chunk in self.chunks[generation:]:
+            self.generation = generation - 1
+            new_generation = True
+            self._agents = []
+            # find start of generation
+            time_stamp = self.generation * self.total_time_stamp
+
+        for index, chunk in enumerate(self.chunks[self.generation:]):
             for line in chunk:
-                if re.search(r"^perform\(.*:" + str(self.time_stamp) + "$", line):
-                    self.perform_line(line)
-                    yield
-            # find new agents
+                if not new_generation:
+                    if re.search(r"^perform\(.*:" + str(self.time_stamp) + "$", line):
+                        self.perform_line(line)
+                        self.time_stamp += 1
+                        yield
+                else:
+                    if time_stamp:
+                        self.find_agents(line, time_stamp)
+                    else:
+                        self.find_agents(line, self.time_stamp - 1)
+                    if re.search(r"^perform\(.*:" + str(self.time_stamp) + "$", line):
+                        new_generation = False
+                        self.time_stamp += 1
+                        yield True
+                        # self.perform_line(line)
+                        # self.time_stamp += 1
+                        yield
+            self.generation += 1
+            self._agents = []
+            self.round = 0
+            self.giving_encounters = 0
+            self.gossip_encounters = 0
+            new_generation = True
 
     def perform_line(self, line):
         if m := re.search(r"^perform\(.*request.*giving_encounter\(\w*,(\w*),(\w*)\).*:" + str(self.time_stamp) + r"$", line):

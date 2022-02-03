@@ -397,3 +397,9 @@ class PlayTournamentScene(Scene):
 
             if info := self.timeline.handle_events(event):
                 self.tournament.time_stamp, self.tournament.generation = info
+                self.run = self.tournament.run(*info)
+                self.new_generation = True
+                next(self.run)
+                print(self.agents[0].name)
+                self.was_running = self.running
+                self.running = False
