@@ -1,8 +1,8 @@
 import os
-import tkinter
+# import tkinter
 
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
-os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
+# os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
+# os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
 
 import pygame
 
@@ -49,14 +49,14 @@ class Screen:
 
     def start(self):
         """Start the tkinter window to display graphs and control both tkinter and pygame"""
-        tk = tkinter.Tk()
-        tk.withdraw()
-        main_dialog = tkinter.Frame(tk)
-        main_dialog.pack()
-        self.manager.tk = tk
+        # tk = tkinter.Tk()
+        # tk.withdraw()
+        # main_dialog = tkinter.Frame(tk)
+        # main_dialog.pack()
+        # self.manager.tk = tk
 
         while self.__cont:
-            main_dialog.update()
+            # main_dialog.update()
             temp = self.manager.graphs.copy()
             for graph in self.manager.graphs:
                 if not self.manager.graphs[graph].running:
@@ -73,7 +73,7 @@ class Screen:
             self.manager.scene.clock.tick(144)
             pygame.display.update()
 
-        main_dialog.destroy()
+        # main_dialog.destroy()
 
 
 if __name__ == "__main__":

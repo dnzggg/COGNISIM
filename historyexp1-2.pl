@@ -50,7 +50,6 @@ rule(player2,stranger(_9848,_9850),[interactedbefore(_9848)=no^_9850]).
 rule(player2,acq(_9802,_9804),[move(_9802)=1^_9804]).
 rule(player2,goodacq(_9740,_9742),[move(_9740)=_9762^_9742,external(greater(_9762,1))]).
 rule(player2,5:select(encounter(_9686,_9688,twinplayer2,_9692),tf2t,inform(twinplayer2,_9688,_9686,cooperate(_9692)),_9682),[conditionstf2tcooperate(_9692,_9682)]).
-
 happens_at(initially(status_of(sensorplayer1)=open),0).
 happens_at(initially(status_of(actuatorplayer1)=on),0).
 happens_at(initially(status_of(sensorplayer2)=open),0).
@@ -70,10 +69,8 @@ happens_at(initially(conductor1:currentsecondplayerindex=1),0).
 happens_at(initially(conductor1:currentaction=askFirst),0).
 happens_at(initially(conductor1:fitness(player1)=0),0).
 happens_at(initially(conductor1:fitness(player2)=0),0).
-
 happens_at(perform(actuatorconductor1,performEnc(conductor1,[player1],encounter(encounter1,player1,twinplayer1))),1).
 happens_at(in(player1,percept(perform(actuatorconductor1,performEnc(conductor1,[player1],encounter(encounter1,player1,twinplayer1))))),1).
-
 happens_at(perform(actuatorconductor1,performEnc(conductor1,[twinplayer1],encounter(encounter1,player1,twinplayer1))),2).
 happens_at(perform(actuatorplayer1,inform(player1,[conductor1],encounter1,cooperate(twinplayer1))),2).
 happens_at(in(conductor1,percept(perform(actuatorplayer1,inform(player1,[conductor1],encounter1,cooperate(twinplayer1))))),2).
