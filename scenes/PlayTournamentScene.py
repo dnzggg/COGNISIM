@@ -5,7 +5,9 @@ import pygame
 from objects import Blob, Button, Scene, DropdownItem, Slider, MessageBox, PositionDict, Timeline
 
 from components import Tournament
-
+import matplotlib
+matplotlib.use('Qt5Agg')
+from matplotlib import pyplot as plt
 
 def rot_center(image, angle):
     """rotate an image while keeping its center and size"""
@@ -72,17 +74,14 @@ class PlayTournamentScene(Scene):
         self.tournament = Tournament()
         self.run = self.tournament.run()
         self.agents = self.tournament.get_agents()
-        self.conductors = self.tournament.get_conductors()
+        self.conductor = self.tournament.get_conductor()
         self.blobs = dict()
         self.playing_agents = None
 
         self.running = False
         self.was_running = False
         self.new_generation = False
-        self.total_generations = self.tournament.total_generations
         self.total_rounds = self.tournament.total_rounds
-        self.total_giving_encounters = self.tournament.total_giving_encounters
-        self.total_gossip_encounters = self.tournament.total_gossip_encounters
 
         self.UPDATE = pygame.USEREVENT + 1
         self.speed = 99
@@ -91,10 +90,12 @@ class PlayTournamentScene(Scene):
         self.tab = 0
         self.home_tab = DropdownItem(pygame.Rect(18, 8, 47, 19), 0, "Home", underline=0, font=15, center=False)
         self.info_tab = DropdownItem(pygame.Rect(89, 8, 29, 19), 1, "Info", underline=0, font=15, center=False)
+        self.graph_tab = DropdownItem(pygame.Rect(142, 8, 29, 19), 2, "Graph", underline=0, font=15, center=False)
 
         self.reset_button = Button(w=90, pos=(16, 39), center=True)
         self.start_stop_button = Button(w=80, pos=(130, 39), center=True)
         self.next_button = Button(w=80, pos=(234, 39), center=True)
+        self.show_statistics_button = Button(w=275, pos=(16, 39), center=True)
 
         self.speed_label = self.font.render("Speed", True, (255, 255, 255))
         self.speed_outside_im = pygame.image.load("Images/speedometer_outside.png")
@@ -121,19 +122,16 @@ class PlayTournamentScene(Scene):
         self.simulation_size_w_padding = None
         self.simulation_size_wo_padding = None
 
-        self.timeline = Timeline(rounds=self.tournament.total_time_stamp)
+        # self.timeline = Timeline(rounds=self.tournament.total_time_stamp)
 
     def render(self, screen):
         """Renders the blobs, buttons, radio buttons, labels and lines"""
         Scene.render(self, screen)
 
         pos1 = pos2 = None
-        if self.tournament.receiver_agent and self.tournament.giver_agent:
-            pos1 = self.blobs[self.tournament.receiver_agent].get_pos()
-            pos2 = self.blobs[self.tournament.giver_agent].get_pos()
-        if self.tournament.gossiping_agents:
-            pos1 = self.blobs[self.tournament.gossiping_agents[0]].get_pos()
-            pos2 = self.blobs[self.tournament.gossiping_agents[1]].get_pos()
+        if self.tournament.player1 and self.tournament.player2:
+            pos1 = self.blobs[self.tournament.player1.index].get_pos()
+            pos2 = self.blobs[self.tournament.player2.index].get_pos()
 
         render_after = []
         for agent in self.blobs:
@@ -142,23 +140,27 @@ class PlayTournamentScene(Scene):
                 if 87 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[1] < h + self.blobs[agent].radius / 2:
                     if self.blobs[agent].show_name:
                         render_after.append(agent)
-                    if agent in [self.tournament.giver_agent, self.tournament.receiver_agent]:
-                        render_after.append(agent)
-                    if agent in self.tournament.gossiping_agents:
-                        render_after.append(agent)
+                    if self.tournament.player1:
+                        if agent == self.tournament.player1.index:
+                            render_after.append(agent)
+                    if self.tournament.player2:
+                        if agent == self.tournament.player2.index:
+                            render_after.append(agent)
                     self.blobs[agent].render(screen)
 
         if pos1 and pos2:
             color = (255, 255, 255)
-            if self.tournament.encounter_type == "Gossip":
-                if self.tournament.gossip:
-                    color = (0, 0, 255)
-            else:
-                if self.tournament.cooperate is not None:
-                    if self.tournament.cooperate:
-                        color = (0, 255, 0)
-                    else:
-                        color = (255, 0, 0)
+            if self.tournament.cooperate is not None:
+                if self.tournament.cooperate:
+                    color = (0, 255, 0)
+                else:
+                    color = (255, 0, 0)
+
+            if self.tournament.player1.index == self.tournament.player2.index:
+                pygame.gfxdraw.aacircle(screen, int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5), int(self.blobs[agent].radius / 1.5) - 1, color)
+                pygame.draw.circle(screen, color, (int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5)), int(self.blobs[agent].radius / 1.5), 1)
+                pygame.gfxdraw.aacircle(screen, int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5), int(self.blobs[agent].radius / 1.5), color)
+
             pygame.draw.aaline(screen, color, (pos1[0] - 2, pos1[1]), (pos2[0] - 2, pos2[1]), blend=100)
             pygame.draw.aaline(screen, color, (pos1[0] - 1, pos1[1]), (pos2[0] - 1, pos2[1]), blend=100)
             pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
@@ -172,6 +174,7 @@ class PlayTournamentScene(Scene):
 
         self.home_tab.render(screen)
         self.info_tab.render(screen)
+        self.graph_tab.render(screen)
 
         if self.tab == 0:
             self.reset_button.render(screen, "Reset")
@@ -190,24 +193,15 @@ class PlayTournamentScene(Scene):
             speed_label = self.font.render(str(self.speed), True, (255, 255, 255))
             screen.blit(speed_label, (729, 44))
         elif self.tab == 1:
-            generation_label = self.font2.render(
-                f"{self.tournament.generation} Generation / {self.total_generations} Generations",
-                True, (255, 255, 255))
-            screen.blit(generation_label, (16, 35))
             round_label = self.font2.render(f"{self.tournament.round} Round / {self.total_rounds} Rounds",
                                             True, (255, 255, 255))
             screen.blit(round_label, (407, 35))
-            giving_encounter_label = self.font2.render(
-                f"{self.tournament.giving_encounters} Giving Encounter / {self.total_giving_encounters} Rounds",
-                True, (255, 255, 255))
-            screen.blit(giving_encounter_label, (664, 35))
-            gossip_encounter_label = self.font2.render(
-                f"{self.tournament.gossip_encounters} Gossip Encounter / {self.total_gossip_encounters} Rounds",
-                True, (255, 255, 255))
-            screen.blit(gossip_encounter_label, (200, 58))
-            encounter_type_label = self.font2.render(f"Encounter type: {self.tournament.encounter_type}",
-                                                     True, (255, 255, 255))
-            screen.blit(encounter_type_label, (544, 58))
+            cooperation_label = self.font2.render(
+                f"{self.tournament.total_cooperation} Cooperated / {self.tournament.round} Rounds", True,
+                (255, 255, 255))
+            screen.blit(cooperation_label, (544, 58))
+        elif self.tab == 2:
+            self.show_statistics_button.render(screen, "Some statistics to show")
 
         pygame.draw.line(screen, (247, 95, 23), (0, 85), (100000, 85), 2)
 
@@ -215,19 +209,19 @@ class PlayTournamentScene(Scene):
             zoom_label = self.font3.render(f"Zoom: {self.zoom}%", True, (255, 255, 255))
             screen.blit(zoom_label, (840, 97))
 
-        self.timeline.render(screen)
+        # self.timeline.render(screen)
 
     def update(self):
         """Updates the blobs' status, and slider"""
         self.agents = self.tournament.get_agents()
-        self.conductors = self.tournament.get_conductors()
+        self.conductor = self.tournament.get_conductor()
 
         if self.new_generation:
             self.running = self.was_running
             self.new_generation = False
             self.blobs = dict()
         else:
-            length = len(self.agents) + len(self.conductors)
+            length = len(self.agents) + 1
             size = (38, 18)
             shift = 0
             while length > size[0] * size[1]:
@@ -243,18 +237,15 @@ class PlayTournamentScene(Scene):
             self.min_shift_y = -self.simulation_size_w_padding[1] + 465 + shift * w
 
             if self.blobs:
-                self.blobs[self.conductors[0]].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
+                self.blobs[self.conductor].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                 for agent in self.agents:
-                    if agent == self.tournament.giver_agent:
-                        self.blobs[agent].update(giver=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
+                    if agent == self.tournament.player1:
+                        self.blobs[agent.index].update(receiver=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                         continue
-                    if agent == self.tournament.receiver_agent:
-                        self.blobs[agent].update(receiver=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
+                    if agent == self.tournament.player2:
+                        self.blobs[agent.index].update(receiver=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                         continue
-                    if agent in self.tournament.gossiping_agents:
-                        self.blobs[agent].update(gossiping=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
-                        continue
-                    self.blobs[agent].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
+                    self.blobs[agent.index].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
             else:
                 zoom = self.zoom
                 self.zoom = 100
@@ -269,11 +260,10 @@ class PlayTournamentScene(Scene):
                 self.zoom = zoom
 
                 x = y = -shift
+                self.blobs[self.conductor] = Blob((x, y), w, 20, self.conductor, conductor=True)
+                x += 1
                 for agent in self.agents:
-                    if x == int(size[0] / 2) - shift and y == int(size[1] / 2) - shift:
-                        self.blobs[self.conductors[0]] = Blob((x, y), w, 20, self.conductors[0], conductor=True)
-                        x += 1
-                    self.blobs[agent] = Blob((x, y), w, 20, agent, player=True)
+                    self.blobs[agent.index] = Blob((x, y), w, 20, agent, player=True)
                     x += 1
                     if x == size[0] - shift:
                         x = -shift
@@ -285,8 +275,15 @@ class PlayTournamentScene(Scene):
 
         self.home_tab.update(self.tab == self.home_tab.index)
         self.info_tab.update(self.tab == self.info_tab.index)
+        self.graph_tab.update(self.tab == self.graph_tab.index)
 
-        self.timeline.update(self.tournament.time_stamp)
+        # self.timeline.update(self.tournament.time_stamp)
+
+    def on_close(self, event):
+        """Closes the window"""
+        print(event)
+        plt.ioff()
+        plt.close(self.f1)
 
     def handle_events(self, events):
         """If the start button is pressed, starts the simulation; if the next button is pressed, gets the next round;
@@ -319,6 +316,20 @@ class PlayTournamentScene(Scene):
                         self.new_generation = True
                         self.was_running = self.running
                         self.running = False
+            elif self.tab == 2:
+                if self.show_statistics_button.handle_events(event):
+                    print(self.tournament.get_agents_data())
+                    plt.ion()
+                    self.f1 = plt.figure(1)
+                    self.f2 = plt.figure(2)
+                    af1 = self.f1.add_subplot(111)
+                    af2 = self.f2.add_subplot(111)
+                    # self.f1.canvas.mpl_connect('close_event', self.on_close)
+                    p1, = af1.plot(self.tournament.round, self.total_rounds)
+                    p2, = af2.plot(self.tournament.round, self.total_rounds)
+                    plt.show()
+                    plt.pause(0.001)
+
 
             if self.check_shift:
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -382,6 +393,8 @@ class PlayTournamentScene(Scene):
                         self.tab = self.home_tab.index
                     if event.key == pygame.K_i:
                         self.tab = self.info_tab.index
+                    if event.key == pygame.K_g:
+                        self.tab = self.graph_tab.index
                 if event.key == pygame.K_SPACE:
                     self.running = not self.running
                 if event.key == pygame.K_RIGHT:
@@ -394,11 +407,13 @@ class PlayTournamentScene(Scene):
                 self.tab = self.home_tab.index
             if self.info_tab.handle_events(event):
                 self.tab = self.info_tab.index
+            if self.graph_tab.handle_events(event):
+                self.tab = self.graph_tab.index
 
-            if info := self.timeline.handle_events(event):
-                self.tournament.time_stamp, self.tournament.generation = info
-                self.run = self.tournament.run(*info)
-                self.new_generation = True
-                next(self.run)
-                self.was_running = self.running
-                self.running = False
+            # if info := self.timeline.handle_events(event):
+            #     self.tournament.time_stamp, self.tournament.generation = info
+            #     self.run = self.tournament.run(*info)
+            #     self.new_generation = True
+            #     next(self.run)
+            #     self.was_running = self.running
+            #     self.running = False
