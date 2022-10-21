@@ -96,6 +96,7 @@ class PlayTournamentScene(Scene):
         self.start_stop_button = Button(w=80, pos=(130, 39), center=True)
         self.next_button = Button(w=80, pos=(234, 39), center=True)
         self.show_statistics_button = Button(w=275, pos=(16, 39), center=True)
+        self.show_statistics_button2 = Button(w=275, pos=(216, 39), center=True)
 
         self.speed_label = self.font.render("Speed", True, (255, 255, 255))
         self.speed_outside_im = pygame.image.load("Images/speedometer_outside.png")
@@ -121,6 +122,8 @@ class PlayTournamentScene(Scene):
 
         self.simulation_size_w_padding = None
         self.simulation_size_wo_padding = None
+
+        self.p1 = None
 
         # self.timeline = Timeline(rounds=self.tournament.total_time_stamp)
 
@@ -161,11 +164,28 @@ class PlayTournamentScene(Scene):
                 pygame.draw.circle(screen, color, (int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5)), int(self.blobs[agent].radius / 1.5), 1)
                 pygame.gfxdraw.aacircle(screen, int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5), int(self.blobs[agent].radius / 1.5), color)
 
-            pygame.draw.aaline(screen, color, (pos1[0] - 2, pos1[1]), (pos2[0] - 2, pos2[1]), blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0] - 1, pos1[1]), (pos2[0] - 1, pos2[1]), blend=100)
-            pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 1), (pos2[0], pos2[1] - 1), blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 2), (pos2[0], pos2[1] - 2), blend=100)
+                pygame.draw.line(screen, color,
+                                    (int(pos1[0] - self.blobs[agent].radius / 4), int(pos1[1] + self.blobs[agent].radius / 1.1)),
+                                    (int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 0.75)), width=2)
+                pygame.draw.line(screen, color,
+                                 (int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 0.75)),
+                                 (int(pos1[0] - self.blobs[agent].radius / 4), int(pos1[1] + self.blobs[agent].radius / 0.6)), width=2)
+            else:
+                pygame.draw.aaline(screen, color, (pos1[0] - 2, pos1[1]), (pos2[0] - 2, pos2[1]), blend=100)
+                pygame.draw.aaline(screen, color, (pos1[0] - 1, pos1[1]), (pos2[0] - 1, pos2[1]), blend=100)
+                pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
+                pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 1), (pos2[0], pos2[1] - 1), blend=100)
+                pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 2), (pos2[0], pos2[1] - 2), blend=100)
+
+                middle = ((pos1[0] + pos2[0]) / 2), ((pos1[1] + pos2[1]) / 2)
+
+                pygame.draw.line(screen, color,
+                                 (int(middle[0] - self.blobs[agent].radius / 4), int(middle[1] - self.blobs[agent].radius / 2)),
+                                 (int(middle[0] + 1), int(middle[1])), width=2)
+                pygame.draw.line(screen, color,
+                                 (int(middle[0] - self.blobs[agent].radius / 4),
+                                  int(middle[1] + self.blobs[agent].radius / 2)),
+                                 (int(middle[0] + 1), int(middle[1])), width=2)
 
         for ra in render_after:
             self.blobs[ra].render(screen)
@@ -202,6 +222,7 @@ class PlayTournamentScene(Scene):
             screen.blit(cooperation_label, (544, 58))
         elif self.tab == 2:
             self.show_statistics_button.render(screen, "Some statistics to show")
+            self.show_statistics_button2.render(screen, "Some statistics to show")
 
         pygame.draw.line(screen, (247, 95, 23), (0, 85), (100000, 85), 2)
 
@@ -277,13 +298,15 @@ class PlayTournamentScene(Scene):
         self.info_tab.update(self.tab == self.info_tab.index)
         self.graph_tab.update(self.tab == self.graph_tab.index)
 
-        # self.timeline.update(self.tournament.time_stamp)
+        if self.p1:
+            time, overall = self.tournament.get_agents_data()
+            if time != self.time or overall != self.overall:
+                self.af1.clear()
+                self.af1.plot(time, overall)
+                self.time = time.copy()
+                self.overall = overall.copy()
 
-    def on_close(self, event):
-        """Closes the window"""
-        print(event)
-        plt.ioff()
-        plt.close(self.f1)
+        # self.timeline.update(self.tournament.time_stamp)
 
     def handle_events(self, events):
         """If the start button is pressed, starts the simulation; if the next button is pressed, gets the next round;
@@ -318,18 +341,32 @@ class PlayTournamentScene(Scene):
                         self.running = False
             elif self.tab == 2:
                 if self.show_statistics_button.handle_events(event):
-                    print(self.tournament.get_agents_data())
+                    time, overall = self.tournament.get_agents_data()
+                    self.time = time.copy()
+                    self.overall = overall.copy()
                     plt.ion()
                     self.f1 = plt.figure(1)
-                    self.f2 = plt.figure(2)
-                    af1 = self.f1.add_subplot(111)
-                    af2 = self.f2.add_subplot(111)
+                    # self.f2 = plt.figure(2)
+                    self.af1 = self.f1.add_subplot(111)
+                    # af2 = self.f2.add_subplot(111)
                     # self.f1.canvas.mpl_connect('close_event', self.on_close)
-                    p1, = af1.plot(self.tournament.round, self.total_rounds)
-                    p2, = af2.plot(self.tournament.round, self.total_rounds)
+                    self.p1, = self.af1.plot(self.time, self.overall)
+
+                    # p2, = af2.plot(self.tournament.round, self.total_rounds)
                     plt.show()
                     plt.pause(0.001)
-
+                if self.show_statistics_button2.handle_events(event):
+                    print(self.tournament.get_agents_data())
+                    plt.ion()
+                    self.f2 = plt.figure(2)
+                    # self.f2 = plt.figure(2)
+                    af2 = self.f2.add_subplot(111)
+                    # af2 = self.f2.add_subplot(111)
+                    # self.f1.canvas.mpl_connect('close_event', self.on_close)
+                    p1, = af2.plot(self.tournament.round, self.total_rounds)
+                    # p2, = af2.plot(self.tournament.round, self.total_rounds)
+                    plt.show()
+                    plt.pause(0.001)
 
             if self.check_shift:
                 if event.type == pygame.MOUSEBUTTONDOWN:
