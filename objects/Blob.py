@@ -1,5 +1,6 @@
 import pygame
 from pygame import gfxdraw
+import tkinter
 
 
 class Blob:
@@ -121,7 +122,7 @@ class Blob:
         self.width = width
         self.circle = pygame.Rect(self.pos[0] * self.width + shift[0], self.pos[1] * self.width + 87 + shift[1], self.radius, self.radius)
 
-    def handle_events(self, event):
+    def handle_events(self, event, tk):
         """When blob is clicked does something
 
         Parameters
@@ -136,6 +137,15 @@ class Blob:
                 self.show_name = True
             else:
                 self.show_name = False
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.circle.collidepoint(event.pos[0], event.pos[1]):
+                tk.title(self.agent.name)
+                text = tkinter.Text(tk)
+                text.insert(tkinter.END, self.agent.name)
+                text.insert(tkinter.END, "a")
+                text.pack()
+                tk.deiconify()
 
     def get_pos(self):
         x = self.circle.x + self.circle.w / 2

@@ -21,8 +21,7 @@ class Tournament:
         self.player2 = None
         self.cooperate = None
         self.belief_lines = []
-        self.time = []
-        self.overall = []
+        self.belief = {"time": [], "agents": dict()}
         self.load_file()
         self._agents_data = dict()
 
@@ -44,6 +43,7 @@ class Tournament:
                 index = re.search(r"^player(\d+)", agent).group(1)
                 name = "player" + index
                 self._agents.append(Agent(int(index), name))
+                self.belief["agents"][name] = []
 
         # temp = self._agents.copy()
         # for agent in self._agents:
@@ -62,23 +62,25 @@ class Tournament:
         self.belief_lines = [f.split("\n")[0] for f in file]
         self.belief_lines = [line for line in self.belief_lines if re.search(r"^conductor1\(fitness.*\.$", line)]
         file.close()
-        self.time.append(0)
+        self.belief["time"].append(0)
         self.update_belief()
 
     def update_belief(self):
-        t = 0
-        for belief in self.belief_lines:
-            for agent in self._agents:
+        for agent in self._agents:
+            for belief in self.belief_lines:
                 if m := re.search(r"^conductor1\(fitness\(" + agent.name + r"\)=(\d*),\[(\d*),(\d*)\]\)\.$", belief):
                     if self.time_stamp in range(int(m.group(2)), int(m.group(3))):
-                        t += int(m.group(1))
                         print(m.group(1), m.group(2), m.group(3))
-        self.overall.append(t)
+                        self.belief["agents"][agent.name].append(m.group(3))
+                        break
+            else:
+                self.belief["agents"][agent.name].append(self.belief["agents"][agent.name][-1])
+
 
     def run(self):
         for line in self.chunks[0]:
             if re.search(r"^happens_at\(perform\(.*\)," + str(self.time_stamp) + r"\)\.$", line) and self.round < self.total_rounds:
-                self.time.append(self.time[-1] + 1)
+                self.belief["time"].append(self.belief["time"][-1] + 1)
                 self.update_belief()
                 if self.perform_line(line):
                     yield
@@ -128,7 +130,7 @@ class Tournament:
         return self._agents
 
     def get_agents_data(self):
-        return self.time, self.overall
+        return self.belief
 
     def get_conductor(self):
         return self._conductor

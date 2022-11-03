@@ -1,13 +1,14 @@
-import random
+import copy
 
+import matplotlib
 import pygame
 
-from objects import Blob, Button, Scene, DropdownItem, Slider, MessageBox, PositionDict, Timeline
-
 from components import Tournament
-import matplotlib
+from objects import Blob, Button, Scene, DropdownItem, Slider
+
 matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
+
 
 def rot_center(image, angle):
     """rotate an image while keeping its center and size"""
@@ -123,7 +124,8 @@ class PlayTournamentScene(Scene):
         self.simulation_size_w_padding = None
         self.simulation_size_wo_padding = None
 
-        self.p1 = None
+        self.graphs = dict()
+        self.belief = None
 
         # self.timeline = Timeline(rounds=self.tournament.total_time_stamp)
 
@@ -298,14 +300,19 @@ class PlayTournamentScene(Scene):
         self.info_tab.update(self.tab == self.info_tab.index)
         self.graph_tab.update(self.tab == self.graph_tab.index)
 
-        if self.p1:
-            time, overall = self.tournament.get_agents_data()
-            if time != self.time or overall != self.overall:
-                self.af1.clear()
-                self.af1.plot(time, overall)
-                self.time = time.copy()
-                self.overall = overall.copy()
-
+        belief = self.tournament.get_agents_data()
+        if self.belief != belief:
+            for graph in self.graphs:
+                if self.graphs[graph]:
+                    graph.clear()
+                    graph.plot(belief["time"], belief["agents"][self.graphs[graph]])
+            # if self.f1:
+            #     self.af1.clear()
+            #     self.af1.plot(belief["time"], belief["agents"]["player1"])
+            # if self.f2:
+            #     self.af2.clear()
+            #     self.af2.plot(belief["time"], belief["agents"]["player2"])
+            self.belief = copy.deepcopy(belief)
         # self.timeline.update(self.tournament.time_stamp)
 
     def handle_events(self, events):
@@ -323,7 +330,7 @@ class PlayTournamentScene(Scene):
                         self.running = False
 
             for agent in self.blobs:
-                self.blobs[agent].handle_events(event)
+                self.blobs[agent].handle_events(event, self.manager.tk)
 
             if self.tab == 0:
                 self.speed_slider.handle_events(event)
@@ -341,29 +348,29 @@ class PlayTournamentScene(Scene):
                         self.running = False
             elif self.tab == 2:
                 if self.show_statistics_button.handle_events(event):
-                    time, overall = self.tournament.get_agents_data()
-                    self.time = time.copy()
-                    self.overall = overall.copy()
+                    belief = self.tournament.get_agents_data()
+                    self.belief = copy.deepcopy(belief)
                     plt.ion()
-                    self.f1 = plt.figure(1)
+                    f1 = plt.figure(1)
                     # self.f2 = plt.figure(2)
-                    self.af1 = self.f1.add_subplot(111)
+                    af1 = f1.add_subplot(111)
+                    self.graphs[af1] = "player1"
                     # af2 = self.f2.add_subplot(111)
-                    # self.f1.canvas.mpl_connect('close_event', self.on_close)
-                    self.p1, = self.af1.plot(self.time, self.overall)
+                    p1, = af1.plot(self.belief["time"], self.belief["agents"]["player1"])
 
                     # p2, = af2.plot(self.tournament.round, self.total_rounds)
                     plt.show()
                     plt.pause(0.001)
                 if self.show_statistics_button2.handle_events(event):
-                    print(self.tournament.get_agents_data())
+                    belief = self.tournament.get_agents_data()
+                    self.belief = copy.deepcopy(belief)
                     plt.ion()
-                    self.f2 = plt.figure(2)
+                    f2 = plt.figure(2)
                     # self.f2 = plt.figure(2)
-                    af2 = self.f2.add_subplot(111)
+                    af2 = f2.add_subplot(111)
+                    self.graphs[af2] = "player2"
                     # af2 = self.f2.add_subplot(111)
-                    # self.f1.canvas.mpl_connect('close_event', self.on_close)
-                    p1, = af2.plot(self.tournament.round, self.total_rounds)
+                    p1, = af2.plot(self.belief["time"], self.belief["agents"]["player2"])
                     # p2, = af2.plot(self.tournament.round, self.total_rounds)
                     plt.show()
                     plt.pause(0.001)
