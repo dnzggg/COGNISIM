@@ -21,7 +21,7 @@ class Tournament:
         self.player2 = None
         self.cooperate = None
         self.belief_lines = []
-        self.belief = {"time": [], "agents": dict()}
+        self.belief = {"time": [], "agents": {"overall": []}}
         self.load_file()
         self._agents_data = dict()
 
@@ -66,16 +66,18 @@ class Tournament:
         self.update_belief()
 
     def update_belief(self):
+        overall = 0
         for agent in self._agents:
             for belief in self.belief_lines:
                 if m := re.search(r"^conductor1\(fitness\(" + agent.name + r"\)=(\d*),\[(\d*),(\d*)\]\)\.$", belief):
                     if self.time_stamp in range(int(m.group(2)), int(m.group(3))):
-                        print(m.group(1), m.group(2), m.group(3))
-                        self.belief["agents"][agent.name].append(m.group(3))
+                        self.belief["agents"][agent.name].append(m.group(1))
+                        overall += int(m.group(1))
                         break
             else:
                 self.belief["agents"][agent.name].append(self.belief["agents"][agent.name][-1])
-
+                overall += int(self.belief["agents"][agent.name][-1])
+        self.belief["agents"]["overall"].append(overall)
 
     def run(self):
         for line in self.chunks[0]:

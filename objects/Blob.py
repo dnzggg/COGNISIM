@@ -67,6 +67,9 @@ class Blob:
 
         self.shift_x = 0
         self.shift_y = 0
+        self.tk = None
+        self.main_dialog = None
+        self.mouse_scroll = 1
 
     def render(self, screen):
         """Renders the blob on the pygame screen
@@ -122,7 +125,7 @@ class Blob:
         self.width = width
         self.circle = pygame.Rect(self.pos[0] * self.width + shift[0], self.pos[1] * self.width + 87 + shift[1], self.radius, self.radius)
 
-    def handle_events(self, event, tk):
+    def handle_events(self, event, manager, round):
         """When blob is clicked does something
 
         Parameters
@@ -140,14 +143,131 @@ class Blob:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.circle.collidepoint(event.pos[0], event.pos[1]):
-                tk.title(self.agent.name)
-                text = tkinter.Text(tk)
-                text.insert(tkinter.END, self.agent.name)
-                text.insert(tkinter.END, "a")
-                text.pack()
-                tk.deiconify()
+                self.tk = manager.tk
+                self.tk.title(self.agent.name)
+                for widget in self.tk.winfo_children():
+                    widget.destroy()
+                self.tk.deiconify()
+
+                frame = tkinter.Frame(self.tk)
+                frame.pack(fill=tkinter.BOTH, expand=True)
+
+                canvas = tkinter.Canvas(frame, bg="#333", borderwidth=0, highlightthickness=0)
+                canvas.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=True)
+
+                scrollbar = tkinter.Scrollbar(frame, orient=tkinter.VERTICAL, command=canvas.yview)
+                scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+
+                self.scrollable_frame = tkinter.Frame(canvas, bg="#333")
+                self.scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+
+                self.scrollable_frame.bind("<Enter>", self.entered)
+                self.scrollable_frame.bind("<Leave>", self.left)
+
+                canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+                canvas.configure(yscrollcommand=scrollbar.set)
+                self.canvas = canvas
+
+                self.draw()
+
+    def _on_mouse_wheel(self, event):
+        self.canvas.yview_scroll(-1 * int((event.delta / 120)), "units")
+
+    def entered(self, event):
+        if self.mouse_scroll:
+            self.scrollable_frame.bind_all("<MouseWheel>", self._on_mouse_wheel)
+
+    def left(self, event):
+        if self.mouse_scroll:
+            self.scrollable_frame.unbind_all("<MouseWheel>")
+
+    def draw(self):
+        frame = tkinter.Canvas(self.scrollable_frame, width=600, height=250, bg="#333", borderwidth=0, highlightthickness=0)
+        frame.pack(side=tkinter.TOP, padx=10, pady=10)
+
+        label = tkinter.Label(frame, text=self.agent.name, bg="#333", fg="white", font=("Montserrat", 14))
+        label.place(x=0, y=0)
+        label2 = tkinter.Label(frame, text="Time Point:", bg="#333", fg="white", font=("Montserrat", 14))
+        label2.place(x=100, y=0)
+
+        label3 = tkinter.Label(frame, text="Types of\nQuestion", bg="#333", fg="white", font=("Montserrat", 10))
+        label3.place(x=0, y=40)
+
+        scrollbar = tkinter.Scrollbar(frame, orient="vertical")
+        scrollbar.place(x=548, y=40, height=38)
+        self.listbox = tkinter.Listbox(frame, width=74, height=2, yscrollcommand=scrollbar.set, exportselection=0,
+                                       borderwidth=2, relief="groove", fg="white", bg="#707070")
+        self.listbox.place(x=100, y=40)
+        self.listbox.insert(tkinter.END, "Why")
+        self.listbox.insert(tkinter.END, "Why not")
+        self.listbox.bind("<Enter>", self.left)
+        self.listbox.bind("<Leave>", self.entered)
+        scrollbar.config(command=self.listbox.yview)
+
+        label4 = tkinter.Label(frame, text="About", bg="#333", fg="white", font=("Montserrat", 10))
+        label4.place(x=0, y=100)
+
+        scrollbar2 = tkinter.Scrollbar(frame, orient="vertical")
+        scrollbar2.place(x=548, y=100, height=55)
+        self.listbox2 = tkinter.Listbox(frame, width=74, height=3, yscrollcommand=scrollbar2.set, exportselection=0,
+                                        borderwidth=2, relief="groove", fg="white", bg="#707070")
+        self.listbox2.place(x=100, y=100)
+        self.listbox2.insert(tkinter.END, "Action")
+        self.listbox2.insert(tkinter.END, "Belief")
+        self.listbox2.insert(tkinter.END, "Goal")
+        self.listbox2.insert(tkinter.END, "Need")
+        self.listbox2.insert(tkinter.END, "Plan")
+        self.listbox2.bind("<Enter>", self.left)
+        self.listbox2.bind("<Leave>", self.entered)
+        scrollbar2.config(command=self.listbox2.yview)
+
+        label5 = tkinter.Label(frame, text="What", bg="#333", fg="white", font=("Montserrat", 10))
+        label5.place(x=0, y=180)
+
+        self.text = tkinter.Text(frame, height=1, width=58, borderwidth=2, relief="groove", fg="white", bg="#707070")
+        self.text.place(x=100, y=180)
+
+        self.button = tkinter.Button(frame, text="Ask", command=self.ask, width=58, bg="#3897f4", fg="white",
+                                font=("Montserrat", 10))
+        self.button.place(x=100, y=220)
+
+    def ask(self):
+        for i in self.listbox.curselection():
+            print(self.listbox.get(i))
+        else:
+            self.listbox["bg"] = "red"
+        for i in self.listbox2.curselection():
+            print(self.listbox2.get(i))
+        else:
+            self.listbox2["bg"] = "red"
+        print(self.text.get("1.0", tkinter.END))
+        label = tkinter.Label(self.scrollable_frame, text="Explanation: " + self.text.get("1.0", tkinter.END),
+                              bg="#333", foreground="orange", font=("Montserrat", 14))
+        label.pack()
+        self.button["state"] = "disabled"
+        self.listbox["state"] = "disabled"
+        self.listbox2["state"] = "disabled"
+        self.text["state"] = "disabled"
+        self.listbox["bg"] = "black"
+        self.listbox2["bg"] = "black"
+        self.text["bg"] = "black"
+        self.listbox["selectbackground"] = "green"
+        self.listbox2["selectbackground"] = "green"
+
+        self.draw()
+
+    def make_scroll(self, parent, thing):
+        v = tkinter.Scrollbar(parent, orient=tkinter.VERTICAL, command=thing.yview)
+        v.grid(row=0, column=1, sticky=tkinter.NS)
+        thing.config(yscrollcommand=v.set)
 
     def get_pos(self):
         x = self.circle.x + self.circle.w / 2
         y = self.circle.y + self.circle.h / 2
         return x, y
+
+    def open(self):
+        string_var = tkinter.StringVar()
+        string_var.set(self.agent.name)
+        label = tkinter.Label(self.tk, textvariable=string_var)
+        label.pack()

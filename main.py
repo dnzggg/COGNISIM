@@ -56,9 +56,11 @@ class Screen:
         tk.withdraw()
         main_dialog = tkinter.Frame(tk)
         main_dialog.pack_forget()
-        tk.geometry("250x250+0+0")
+        tk.geometry("650x350+0+0")
         tk.protocol("WM_DELETE_WINDOW", self.on_closing)
+        tk.configure(background='#333')
         self.manager.tk = tk
+        self.manager.main_dialog = main_dialog
 
         while self.__cont:
             try:

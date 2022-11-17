@@ -36,3 +36,7 @@ class SceneManager(object):
             pass
         self.scene = scene
         self.scene.manager = self
+
+    def go_back(self):
+        """Changes to previous scene"""
+        self.go_to(self.previous)

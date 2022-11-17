@@ -1,8 +1,7 @@
 import pygame
 from pygame import gfxdraw
 
-from objects import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem
-from .PlayTournamentScene import PlayTournamentScene
+from objects import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem, TextButton
 
 
 class SelectAgentsScene(Scene):
@@ -56,29 +55,29 @@ class SelectAgentsScene(Scene):
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
 
-        self.item = DropdownItem((100, 100), 1, "12345678")
+        self.back_button = TextButton(pos=(16, 16), w=69, h=25, font_size=21)
 
         self.player_label = self.font.render("Player Agent", True, (255, 255, 255))
         self.gossip_type_list = ["Fair", "Selection 2", "Selection 3", "Selection 4", "Selection 5", "Selection 6"]
-        self.gossip_type_dropdown = Dropdown("Gossip Type", w=131, pos=(177, 16), selections=self.gossip_type_list)
+        self.gossip_type_dropdown = Dropdown("Gossip Type", w=131, pos=(545, 16), selections=self.gossip_type_list)
         self.discrimination_type_list = ["Cooperator", "Stern", "Defector", "Selection 4", "Selection 5", "Selection 6"]
-        self.discrimination_type_dropdown = Dropdown("Discrimination Type", w=193, pos=(334, 16), selections=self.discrimination_type_list)
+        self.discrimination_type_dropdown = Dropdown("Discrimination Type", w=193, pos=(741, 16), selections=self.discrimination_type_list)
 
         self.discrimination_threshold_label = self.font2.render("Discrimination Threshold (-5 to 5.5):", True, (255, 255, 255))
-        self.discrimination_threshold_input = InputBox((833, 16), w=101, h=27, text="0.543", fro=-5, to=5.5, decimal=True, negative=True)
+        self.discrimination_threshold_input = InputBox((299, 99), w=101, h=27, text="0.543", fro=-5, to=5.5, decimal=True, negative=True)
         self.gossip_weight_label = self.font2.render("Gossip Weight (0 to 1):", True, (255, 255, 255))
-        self.gossip_weight_input = InputBox((196, 55), w=101, h=27, text="0.543", fro=0, to=1, decimal=True)
+        self.gossip_weight_input = InputBox((521, 55), w=101, h=27, text="0.543", fro=0, to=1, decimal=True)
         self.trust_criteria_label = self.font2.render("Trust Criteria (0 to 1):", True, (255, 255, 255))
-        self.trust_criteria_input = InputBox((521, 55), w=101, h=27, text="0.543", fro=0, to=1, decimal=True)
+        self.trust_criteria_input = InputBox((183, 55), w=101, h=27, text="0.543", fro=0, to=1, decimal=True)
         self.number_of_players_label = self.font2.render("Number of Players:", True, (255, 255, 255))
         self.number_of_players_input = InputBox((833, 55), w=101, h=27, text="1000")
 
         self.self_advertisement = True
         self.self_advertisement_radio_label = self.font2.render("Self Advertisement:", True, (255, 255, 255))
         self.self_advertisement_radio_yes_label = self.font2.render("Yes", True, (255, 255, 255))
-        self.self_advertisement_radio_yes = RadioButton((170 + 12, 100 + 12), on=True)
+        self.self_advertisement_radio_yes = RadioButton((650 + 12, 101 + 12), on=True)
         self.self_advertisement_radio_no_label = self.font2.render("No", True, (255, 255, 255))
-        self.self_advertisement_radio_no = RadioButton((231 + 12, 100 + 12), on=False)
+        self.self_advertisement_radio_no = RadioButton((711 + 12, 101 + 12), on=False)
         self.self_advertisement_radio_no.bind(self.self_advertisement_radio_yes, self.change_self_advertisement)
 
         self.add_button = Button(w=75, pos=(859, 92), center=True)
@@ -146,20 +145,22 @@ class SelectAgentsScene(Scene):
                 and the button"""
         Scene.render(self, screen)
 
-        screen.blit(self.player_label, (16, 16))
-        screen.blit(self.discrimination_threshold_label, (553, 20))
+        self.back_button.render(screen, "Back")
+
+        screen.blit(self.player_label, (344, 16))
+        screen.blit(self.discrimination_threshold_label, (19, 103))
         self.discrimination_threshold_input.render(screen)
-        screen.blit(self.gossip_weight_label, (19, 59))
+        screen.blit(self.gossip_weight_label, (344, 59))
         self.gossip_weight_input.render(screen)
-        screen.blit(self.trust_criteria_label, (357, 59))
+        screen.blit(self.trust_criteria_label, (19, 59))
         self.trust_criteria_input.render(screen)
         screen.blit(self.number_of_players_label, (682, 59))
         self.number_of_players_input.render(screen)
 
-        screen.blit(self.self_advertisement_radio_label, (19, 102))
-        screen.blit(self.self_advertisement_radio_yes_label, (198, 102))
+        screen.blit(self.self_advertisement_radio_label, (499, 103))
+        screen.blit(self.self_advertisement_radio_yes_label, (678, 103))
         self.self_advertisement_radio_yes.render(screen)
-        screen.blit(self.self_advertisement_radio_no_label, (259, 102))
+        screen.blit(self.self_advertisement_radio_no_label, (739, 103))
         self.self_advertisement_radio_no.render(screen)
 
         self.add_button.render(screen, "Add")
@@ -277,6 +278,9 @@ class SelectAgentsScene(Scene):
                 self.max_image_score_range_input.handle_events(event)
                 self.max_generation_range_input.handle_events(event)
 
+                if self.back_button.handle_events(event):
+                    self.manager.go_back()
+
                 if self.add_button.handle_events(event):
                     discrimination_type = self.discrimination_type_list[self.discrimination_type_dropdown.selected]
                     discrimination_threshold = self.discrimination_threshold_input.get_text()
@@ -313,7 +317,7 @@ class SelectAgentsScene(Scene):
                     print("output(resultsin('" + self.results_file_name_input.get_text() + "')),")
                     print("output(eventsin('" + self.events_file_name_input.get_text() + "'))")
 
-                    self.manager.go_to(PlayTournamentScene())
+                    # self.manager.go_to(PlayTournamentScene())
 
                 self.self_advertisement_radio_no.handle_events(event)
                 self.self_advertisement_radio_yes.handle_events(event)

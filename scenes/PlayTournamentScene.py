@@ -5,6 +5,7 @@ import pygame
 
 from components import Tournament
 from objects import Blob, Button, Scene, DropdownItem, Slider
+from .SelectAgentsScene import SelectAgentsScene
 
 matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
@@ -90,14 +91,16 @@ class PlayTournamentScene(Scene):
 
         self.tab = 0
         self.home_tab = DropdownItem(pygame.Rect(18, 8, 47, 19), 0, "Home", underline=0, font=15, center=False)
-        self.info_tab = DropdownItem(pygame.Rect(89, 8, 29, 19), 1, "Info", underline=0, font=15, center=False)
-        self.graph_tab = DropdownItem(pygame.Rect(142, 8, 29, 19), 2, "Graph", underline=0, font=15, center=False)
+        self.edit_tab = DropdownItem(pygame.Rect(89, 8, 30, 19), 1, "Edit", underline=0, font=15, center=False)
+        self.info_tab = DropdownItem(pygame.Rect(143, 8, 29, 19), 2, "Info", underline=0, font=15, center=False)
+        self.graph_tab = DropdownItem(pygame.Rect(196, 8, 47, 19), 3, "Graph", underline=0, font=15, center=False)
 
         self.reset_button = Button(w=90, pos=(16, 39), center=True)
         self.start_stop_button = Button(w=80, pos=(130, 39), center=True)
         self.next_button = Button(w=80, pos=(234, 39), center=True)
         self.show_statistics_button = Button(w=275, pos=(16, 39), center=True)
         self.show_statistics_button2 = Button(w=275, pos=(216, 39), center=True)
+        self.show_statistics_button3 = Button(w=275, pos=(416, 39), center=True)
 
         self.speed_label = self.font.render("Speed", True, (255, 255, 255))
         self.speed_outside_im = pygame.image.load("Images/speedometer_outside.png")
@@ -105,6 +108,9 @@ class PlayTournamentScene(Scene):
         self.speed_inside_im = pygame.image.load("Images/speedometer_inside.png")
         self.speed_inside_im = pygame.transform.smoothscale(self.speed_inside_im, (15, 15))
         self.speed_slider = Slider((465, 57), 240, fro=5, to=100)
+
+        self.load_button = Button(w=208, pos=(18, 39), center=True)
+        self.new_experiment_button = Button(w=279, pos=(250, 39), center=True)
 
         self.shift = False
         self.check_shift = True
@@ -195,6 +201,7 @@ class PlayTournamentScene(Scene):
         pygame.draw.rect(screen, (30, 30, 30), (0, 0, 100000, 85))
 
         self.home_tab.render(screen)
+        self.edit_tab.render(screen)
         self.info_tab.render(screen)
         self.graph_tab.render(screen)
 
@@ -202,7 +209,7 @@ class PlayTournamentScene(Scene):
             self.reset_button.render(screen, "Reset")
             # self.prev_button.render(screen, "Prev")
             if not self.running:
-                self.start_stop_button.render(screen, "Start")
+                self.start_stop_button.render(screen, "Play")
             else:
                 self.start_stop_button.render(screen, "Stop")
             self.next_button.render(screen, "Next")
@@ -215,16 +222,20 @@ class PlayTournamentScene(Scene):
             speed_label = self.font.render(str(self.speed), True, (255, 255, 255))
             screen.blit(speed_label, (729, 44))
         elif self.tab == 1:
+            self.load_button.render(screen, "Load Experiment")
+            self.new_experiment_button.render(screen, "Create New Experiment")
+        elif self.tab == 2:
             round_label = self.font2.render(f"{self.tournament.round} Round / {self.total_rounds} Rounds",
                                             True, (255, 255, 255))
-            screen.blit(round_label, (407, 35))
+            screen.blit(round_label, (122, 46))
             cooperation_label = self.font2.render(
                 f"{self.tournament.total_cooperation} Cooperated / {self.tournament.round} Rounds", True,
                 (255, 255, 255))
-            screen.blit(cooperation_label, (544, 58))
-        elif self.tab == 2:
-            self.show_statistics_button.render(screen, "Some statistics to show")
-            self.show_statistics_button2.render(screen, "Some statistics to show")
+            screen.blit(cooperation_label, (562, 46))
+        elif self.tab == 3:
+            self.show_statistics_button.render(screen, "Player 1 statistics")
+            self.show_statistics_button2.render(screen, "Player 2 statistics")
+            self.show_statistics_button3.render(screen, "Overall statistics")
 
         pygame.draw.line(screen, (247, 95, 23), (0, 85), (100000, 85), 2)
 
@@ -297,6 +308,7 @@ class PlayTournamentScene(Scene):
             self.speed = int(self.speed_slider.number)
 
         self.home_tab.update(self.tab == self.home_tab.index)
+        self.edit_tab.update(self.tab == self.edit_tab.index)
         self.info_tab.update(self.tab == self.info_tab.index)
         self.graph_tab.update(self.tab == self.graph_tab.index)
 
@@ -324,13 +336,16 @@ class PlayTournamentScene(Scene):
             if event.type == self.UPDATE:
                 pygame.time.set_timer(self.UPDATE, self.speed, True)
                 if self.running:
-                    if next(self.run):
-                        self.new_generation = True
-                        self.was_running = self.running
+                    try:
+                        if next(self.run):
+                            self.new_generation = True
+                            self.was_running = self.running
+                            self.running = False
+                    except StopIteration:
                         self.running = False
 
             for agent in self.blobs:
-                self.blobs[agent].handle_events(event, self.manager.tk)
+                self.blobs[agent].handle_events(event, self.manager, self.tournament.round)
 
             if self.tab == 0:
                 self.speed_slider.handle_events(event)
@@ -342,11 +357,19 @@ class PlayTournamentScene(Scene):
                     self.running = not self.running
 
                 if self.next_button.handle_events(event):
-                    if next(self.run):
-                        self.new_generation = True
-                        self.was_running = self.running
+                    try:
+                        if next(self.run):
+                            self.new_generation = True
+                            self.was_running = self.running
+                            self.running = False
+                    except StopIteration:
                         self.running = False
-            elif self.tab == 2:
+            elif self.tab == 1:
+                if self.load_button.handle_events(event):
+                    pass
+                if self.new_experiment_button.handle_events(event):
+                    self.manager.go_to(SelectAgentsScene())
+            elif self.tab == 3:
                 if self.show_statistics_button.handle_events(event):
                     belief = self.tournament.get_agents_data()
                     self.belief = copy.deepcopy(belief)
@@ -357,7 +380,10 @@ class PlayTournamentScene(Scene):
                     self.graphs[af1] = "player1"
                     # af2 = self.f2.add_subplot(111)
                     p1, = af1.plot(self.belief["time"], self.belief["agents"]["player1"])
-
+                    af1.set_xlabel("Time")
+                    af1.set_ylabel("Payoff")
+                    af1.set_title("Player 1 Payoff")
+                    f1.canvas.manager.set_window_title("Player 1 Payoff")
                     # p2, = af2.plot(self.tournament.round, self.total_rounds)
                     plt.show()
                     plt.pause(0.001)
@@ -371,6 +397,27 @@ class PlayTournamentScene(Scene):
                     self.graphs[af2] = "player2"
                     # af2 = self.f2.add_subplot(111)
                     p1, = af2.plot(self.belief["time"], self.belief["agents"]["player2"])
+                    af2.set_xlabel("Time")
+                    af2.set_ylabel("Payoff")
+                    af2.set_title("Player 2 Payoff")
+                    f2.canvas.manager.set_window_title("Player 2 Payoff")
+                    # p2, = af2.plot(self.tournament.round, self.total_rounds)
+                    plt.show()
+                    plt.pause(0.001)
+                if self.show_statistics_button3.handle_events(event):
+                    belief = self.tournament.get_agents_data()
+                    self.belief = copy.deepcopy(belief)
+                    plt.ion()
+                    f3 = plt.figure(3)
+                    # self.f2 = plt.figure(2)
+                    af3 = f3.add_subplot(111)
+                    self.graphs[af3] = "overall"
+                    # af2 = self.f2.add_subplot(111)
+                    p1, = af3.plot(self.belief["time"], self.belief["agents"]["overall"])
+                    af3.set_xlabel("Time")
+                    af3.set_ylabel("Payoff")
+                    af3.set_title("Overall Payoff")
+                    f3.canvas.manager.set_window_title("Overall Payoff")
                     # p2, = af2.plot(self.tournament.round, self.total_rounds)
                     plt.show()
                     plt.pause(0.001)
@@ -435,6 +482,8 @@ class PlayTournamentScene(Scene):
                 if pygame.key.get_mods() and pygame.KMOD_ALT:
                     if event.key == pygame.K_h:
                         self.tab = self.home_tab.index
+                    if event.key == pygame.K_e:
+                        self.tab = self.edit_tab.index
                     if event.key == pygame.K_i:
                         self.tab = self.info_tab.index
                     if event.key == pygame.K_g:
@@ -442,13 +491,18 @@ class PlayTournamentScene(Scene):
                 if event.key == pygame.K_SPACE:
                     self.running = not self.running
                 if event.key == pygame.K_RIGHT:
-                    if next(self.run):
-                        self.new_generation = True
-                        self.was_running = self.running
+                    try:
+                        if next(self.run):
+                            self.new_generation = True
+                            self.was_running = self.running
+                            self.running = False
+                    except StopIteration:
                         self.running = False
 
             if self.home_tab.handle_events(event):
                 self.tab = self.home_tab.index
+            if self.edit_tab.handle_events(event):
+                self.tab = self.edit_tab.index
             if self.info_tab.handle_events(event):
                 self.tab = self.info_tab.index
             if self.graph_tab.handle_events(event):
