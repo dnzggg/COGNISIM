@@ -5,7 +5,7 @@ from .Agent import Agent
 
 
 class Tournament:
-    def __init__(self, file_name="./historyexp1.pl"):
+    def __init__(self, file_name):
         self.file_name = file_name
         self.chunks = None
         self.total_rounds = 0

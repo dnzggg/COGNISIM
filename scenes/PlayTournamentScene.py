@@ -5,7 +5,7 @@ import pygame
 
 from components import Tournament
 from objects import Blob, Button, Scene, DropdownItem, Slider
-from .SelectAgentsScene import SelectAgentsScene
+
 
 matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
@@ -64,7 +64,7 @@ class PlayTournamentScene(Scene):
     plot_graph(name, xs, ys, x_label, y_label, title)
         Creates a Graph object, adds it to the list of graphs
     """
-    def __init__(self):
+    def __init__(self, file_name):
         Scene.__init__(self)
         size = pygame.display.get_window_size()
         pygame.display.set_mode((size[0], size[1]), pygame.RESIZABLE)
@@ -73,7 +73,7 @@ class PlayTournamentScene(Scene):
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
         self.font3 = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 15)
 
-        self.tournament = Tournament()
+        self.tournament = Tournament(file_name)
         self.run = self.tournament.run()
         self.agents = self.tournament.get_agents()
         self.conductor = self.tournament.get_conductor()
@@ -351,7 +351,7 @@ class PlayTournamentScene(Scene):
                 self.speed_slider.handle_events(event)
 
                 if self.reset_button.handle_events(event):
-                    self.manager.go_to(self.manager.previous)
+                    self.manager.go_back()
 
                 if self.start_stop_button.handle_events(event):
                     self.running = not self.running
@@ -366,9 +366,9 @@ class PlayTournamentScene(Scene):
                         self.running = False
             elif self.tab == 1:
                 if self.load_button.handle_events(event):
-                    pass
+                    self.manager.go_to("SelectFileScene")
                 if self.new_experiment_button.handle_events(event):
-                    self.manager.go_to(SelectAgentsScene())
+                    self.manager.go_to("SelectAgentsScene")
             elif self.tab == 3:
                 if self.show_statistics_button.handle_events(event):
                     belief = self.tournament.get_agents_data()

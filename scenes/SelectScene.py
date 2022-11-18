@@ -1,8 +1,6 @@
 import pygame
 
 from objects import Scene
-from .SelectAgentsScene import SelectAgentsScene
-from .SelectFileScene import SelectFileScene
 
 
 class SelectScene(Scene):
@@ -60,6 +58,6 @@ class SelectScene(Scene):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.one:
-                    self.manager.go_to(SelectFileScene())
+                    self.manager.go_to("SelectFileScene")
                 if self.two:
-                    self.manager.go_to(SelectAgentsScene())
+                    self.manager.go_to("SelectAgentsScene")

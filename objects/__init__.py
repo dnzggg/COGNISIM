@@ -2,7 +2,7 @@
 
 __all__ = ["Scene", "SceneManager", "Button", "Background", "Chip", "HorizontalScroll", "DropdownItem", "QuitException",
            "RadioButton", "InputBox", "Blob", "ImageButton", "Slider", "MessageBox", "PositionDict", "Dropdown",
-           "Timeline", "TextButton", "VerticalScroll"]
+           "Timeline", "TextButton", "VerticalScroll", "File"]
 
 from .Background import Background
 from .Blob import Blob
@@ -22,3 +22,4 @@ from .QuitException import QuitException
 from .Timeline import Timeline
 from .TextButton import TextButton
 from .VerticalScroll import VerticalScroll
+from .File import File
