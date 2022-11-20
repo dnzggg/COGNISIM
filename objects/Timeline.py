@@ -3,7 +3,7 @@ from pygame import gfxdraw
 
 
 class Timeline:
-    def __init__(self, pos=(45, 485), width=855, chunks=20, round_num=0, rounds=1452):
+    def __init__(self, pos=(45, 515), width=855, chunks=20, round_num=0, rounds=1452):
         self.pos = pos
         self.width = int(width/chunks)
         self.chunks = chunks

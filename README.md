@@ -5,9 +5,32 @@ Running
 Install Python from https://www.python.org/downloads/release/python-380/.
 
 To install all the dependencies, run:
-
-    pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
+    
 
 To run the GUI, run:
+```bash
+python main.py
+```
 
-    python main.py
+To split event files, run:
+```bash
+python split_event_file.py
+```
+This creates a directory of the event file name, and splits the event file into specific agents:
+
+```
+.
+├───event_file_name
+    ├───conductor1
+    │   ├───events.pl
+    │   └───fluents.pl
+    ├───player1
+    │   ├───events.pl
+    │   └───fluents.pl
+    └───player2
+        ├───events.pl
+        └───fluents.pl
+```

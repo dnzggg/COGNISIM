@@ -1,8 +1,8 @@
 import os
 import tkinter
 
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
-os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
+# os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
+# os.environ['SDL_VIDEO_WINDOW_POS'] = "250,200"
 
 import pygame
 
@@ -47,22 +47,27 @@ class Screen:
         icon = pygame.image.load("Images/logo.png")
         pygame.display.set_icon(icon)
 
+    def on_closing(self):
+        self.manager.tk.withdraw()
+
     def start(self):
         """Start the tkinter window to display graphs and control both tkinter and pygame"""
         tk = tkinter.Tk()
         tk.withdraw()
         main_dialog = tkinter.Frame(tk)
-        main_dialog.pack()
+        main_dialog.pack_forget()
+        tk.geometry("900x300+0+0")
+        tk.protocol("WM_DELETE_WINDOW", self.on_closing)
+        tk.configure(background='#333')
+        tk.wm_attributes('-transparentcolor', '#abcabc')
         self.manager.tk = tk
+        self.manager.main_dialog = main_dialog
 
         while self.__cont:
-            main_dialog.update()
-            temp = self.manager.graphs.copy()
-            for graph in self.manager.graphs:
-                if not self.manager.graphs[graph].running:
-                    temp.pop(graph)
-                self.manager.graphs[graph].update()
-            self.manager.graphs = temp
+            try:
+                main_dialog.update()
+            except:
+                print("tkinter window closed")
             try:
                 self.manager.scene.handle_events(pygame.event.get())
             except QuitException:

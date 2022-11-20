@@ -1,8 +1,6 @@
 import pygame
 
 from objects import Background, Button, Scene
-from .SelectAgentsScene import SelectAgentsScene
-from .PlayEvolutionaryTournamentScene import PlayEvolutionaryTournamentScene
 
 
 class StartScene(Scene):
@@ -59,6 +57,6 @@ class StartScene(Scene):
         for event in events:
             self.button.handle_events(event)
             if event.type == pygame.KEYDOWN:
-                self.manager.go_to(PlayEvolutionaryTournamentScene())
+                self.manager.go_to("SelectScene")
             if self.button.handle_events(event):
-                self.manager.go_to(PlayEvolutionaryTournamentScene())
+                self.manager.go_to("SelectScene")

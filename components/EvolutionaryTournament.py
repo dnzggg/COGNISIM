@@ -63,7 +63,7 @@ class EvolutionaryTournament:
         if conductor:
             name = conductor.group(1)
             index = re.search(r"^coordinator(\d+)", name).group(1)
-            self._conductors.append(Agent(int(index), name, conductor=True))
+            self._conductors.append(Agent(int(index), name, strategy="Conductor"))
         if agent:
             name = agent.group(1)
             index = re.search(r"^generation\d+Player(\d+)", name).group(1)
