@@ -1,6 +1,6 @@
 """Module for components of the project."""
 
-__all__ = ["Agent", "Tournament"]
+__all__ = ["Agent", "EvolutionaryTournament"]
 
 from .Agent import Agent
-from .Tournament import Tournament
+from .EvolutionaryTournament import EvolutionaryTournament

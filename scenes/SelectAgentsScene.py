@@ -2,7 +2,7 @@ import pygame
 from pygame import gfxdraw
 
 from objects import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem
-from .PlayTournamentScene import PlayTournamentScene
+from .PlayEvolutionaryTournamentScene import PlayEvolutionaryTournamentScene
 
 
 class SelectAgentsScene(Scene):
@@ -313,7 +313,7 @@ class SelectAgentsScene(Scene):
                     print("output(resultsin('" + self.results_file_name_input.get_text() + "')),")
                     print("output(eventsin('" + self.events_file_name_input.get_text() + "'))")
 
-                    self.manager.go_to(PlayTournamentScene())
+                    self.manager.go_to(PlayEvolutionaryTournamentScene())
 
                 self.self_advertisement_radio_no.handle_events(event)
                 self.self_advertisement_radio_yes.handle_events(event)

@@ -4,7 +4,7 @@ import pygame
 
 from objects import Blob, Button, Scene, DropdownItem, Slider, MessageBox, PositionDict, Timeline
 
-from components import Tournament
+from components import EvolutionaryTournament
 
 
 def rot_center(image, angle):
@@ -17,7 +17,7 @@ def rot_center(image, angle):
     return rot_image
 
 
-class PlayTournamentScene(Scene):
+class PlayEvolutionaryTournamentScene(Scene):
     """Scene where the user can see the simulation and interact with its objects.
     
     Attributes
@@ -69,7 +69,7 @@ class PlayTournamentScene(Scene):
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
         self.font3 = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 15)
 
-        self.tournament = Tournament()
+        self.tournament = EvolutionaryTournament()
         self.run = self.tournament.start()
         self.agents = self.tournament.get_agents()
         self.conductors = self.tournament.get_conductors()
