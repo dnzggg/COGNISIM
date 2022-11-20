@@ -3,7 +3,7 @@ import copy
 import matplotlib
 import pygame
 
-from components import Tournament
+from components import AxelrodTournament
 from objects import Blob, Button, Scene, DropdownItem, Slider
 
 
@@ -73,7 +73,7 @@ class PlayAxelrodTournamentScene(Scene):
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
         self.font3 = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 15)
 
-        self.tournament = Tournament(file_name)
+        self.tournament = AxelrodTournament(file_name)
         self.run = self.tournament.run()
         self.agents = self.tournament.get_agents()
         self.conductor = self.tournament.get_conductor()

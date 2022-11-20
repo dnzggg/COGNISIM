@@ -4,7 +4,7 @@ import time
 from .Agent import Agent
 
 
-class Tournament:
+class AxelrodTournament:
     def __init__(self, file_name):
         self.file_name = file_name
         self.chunks = None
