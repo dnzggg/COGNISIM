@@ -41,4 +41,4 @@ class SelectFileScene(Scene):
             if self.back_button.handle_events(event):
                 self.manager.go_back()
             elif i := self.vertical_scroll.handle_events(event):
-                self.manager.go_to("PlayTournamentScene", self.files[i - 1].text)
+                self.manager.go_to("PlayAxelrodTournamentScene", self.files[i - 1].text)

@@ -1,8 +1,8 @@
 """Module for all the scenes."""
 
-__all__ = ["StartScene", "SelectAgentsScene", "PlayTournamentScene", "SelectScene", "SelectFileScene"]
+__all__ = ["StartScene", "SelectAgentsScene", "PlayAxelrodTournamentScene", "SelectScene", "SelectFileScene"]
 
-from .PlayTournamentScene import PlayTournamentScene
+from .PlayAxelrodTournamentScene import PlayAxelrodTournamentScene
 from .SelectAgentsScene import SelectAgentsScene
 from .StartScene import StartScene
 from .SelectScene import SelectScene

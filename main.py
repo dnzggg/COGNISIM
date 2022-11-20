@@ -53,7 +53,7 @@ class Screen:
     def start(self):
         """Start the tkinter window to display graphs and control both tkinter and pygame"""
         tk = tkinter.Tk()
-        # tk.withdraw()
+        tk.withdraw()
         main_dialog = tkinter.Frame(tk)
         main_dialog.pack_forget()
         tk.geometry("900x300+0+0")

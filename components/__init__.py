@@ -3,4 +3,4 @@
 __all__ = ["Agent", "Tournament"]
 
 from .Agent import Agent
-from .Tournament import Tournament
+from .AxelrodTournament import Tournament

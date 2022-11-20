@@ -21,7 +21,7 @@ def rot_center(image, angle):
     return rot_image
 
 
-class PlayTournamentScene(Scene):
+class PlayAxelrodTournamentScene(Scene):
     """Scene where the user can see the simulation and interact with its objects.
     
     Attributes
