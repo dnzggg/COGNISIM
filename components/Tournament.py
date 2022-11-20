@@ -38,19 +38,20 @@ class Tournament:
             if cond := re.search(r"^conductor(\d+)", agent):
                 index = cond.group(1)
                 name = "conductor" + index
-                self._conductor = Agent(int(index), name, conductor=True)
+                self._conductor = Agent(int(index), name, "conductor")
             else:
                 index = re.search(r"^player(\d+)", agent).group(1)
                 name = "player" + index
                 self._agents.append(Agent(int(index), name))
                 self.belief["agents"][name] = []
 
-        # temp = self._agents.copy()
-        # for agent in self._agents:
-        #     temp.append(Agent(agent.index + len(self._agents), "twin" + agent.name))
-        #     self._agents_data[agent.name] = []
-        #     self._agents_data[temp[-1].name] = []
-        # self._agents = temp
+        id = 0
+        for line in self.chunks[0]:
+            if m := re.search(r"^rule\(" + self._agents[id].name + r",strategy\((.*)\),\[\]\)\.$", line):
+                self._agents[id].strategy = m.group(1)
+                id += 1
+                if id == len(self._agents):
+                    break
 
         for line in reversed(self.chunks[0]):
             if m := re.search(r"^.*\),(\d+)\)\.$", line):
@@ -93,7 +94,7 @@ class Tournament:
             player = m.group(1)
             if i := re.search(r"^twinplayer(.*)", player):
                 p = self._agents[int(i.group(1)) - 1]
-                player = Agent(p.index, "twin" + p.name)
+                player = Agent(p.index, "twin" + p.name, p.strategy)
             else:
                 i = re.search(r"^player(.*)", player).group(1)
                 player = self._agents[int(i) - 1]

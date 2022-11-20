@@ -53,12 +53,13 @@ class Screen:
     def start(self):
         """Start the tkinter window to display graphs and control both tkinter and pygame"""
         tk = tkinter.Tk()
-        tk.withdraw()
+        # tk.withdraw()
         main_dialog = tkinter.Frame(tk)
         main_dialog.pack_forget()
-        tk.geometry("650x350+0+0")
+        tk.geometry("900x300+0+0")
         tk.protocol("WM_DELETE_WINDOW", self.on_closing)
         tk.configure(background='#333')
+        tk.wm_attributes('-transparentcolor', '#abcabc')
         self.manager.tk = tk
         self.manager.main_dialog = main_dialog
 

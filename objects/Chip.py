@@ -37,7 +37,7 @@ class Chip:
         self.rect = pygame.Rect(pos[0], pos[1], w, h)
         self.delete_im = pygame.image.load("Images/close.png")
 
-    def render(self, screen, movex, movey):
+    def render(self, screen, move):
         """Render the button and its text
 
         Parameters
@@ -48,8 +48,7 @@ class Chip:
             text to be rendered on the button
         """
         rect = self.rect.copy()
-        rect.x += movex
-        rect.y += movey
+        rect.x += move
         pygame.draw.rect(screen, self.color, rect, 2, border_radius=20)
 
         screen.blit(self.text, (rect.x + 8, rect.y + 8))

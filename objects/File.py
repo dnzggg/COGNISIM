@@ -31,7 +31,7 @@ class File:
         """
         self.font_size = font_size
         self.color = (255, 255, 255)
-        self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", self.font_size)
+        self.font = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", self.font_size)
         self.text = text
         text = self.font.render(self.text, True, self.color)
         w = text.get_size()[0]
