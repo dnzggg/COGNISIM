@@ -58,7 +58,7 @@ class PlayEvolutionaryTournamentScene(Scene):
         Creates a Graph object, adds it to the list of graphs
     """
 
-    def __init__(self):
+    def __init__(self, file_name):
         Scene.__init__(self)
         size = pygame.display.get_window_size()
         pygame.display.set_mode((size[0], size[1]), pygame.RESIZABLE)
@@ -67,7 +67,7 @@ class PlayEvolutionaryTournamentScene(Scene):
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
         self.font3 = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 15)
 
-        self.tournament = EvolutionaryTournament()
+        self.tournament = EvolutionaryTournament(file_name)
         self.run = self.tournament.start()
         self.agents = self.tournament.get_agents()
         self.conductors = self.tournament.get_conductors()
@@ -88,7 +88,9 @@ class PlayEvolutionaryTournamentScene(Scene):
 
         self.tab = 0
         self.home_tab = DropdownItem(pygame.Rect(18, 8, 47, 19), 0, "Home", underline=0, font=15, center=False)
-        self.info_tab = DropdownItem(pygame.Rect(89, 8, 29, 19), 1, "Info", underline=0, font=15, center=False)
+        self.edit_tab = DropdownItem(pygame.Rect(89, 8, 30, 19), 1, "Edit", underline=0, font=15, center=False)
+        self.info_tab = DropdownItem(pygame.Rect(143, 8, 29, 19), 2, "Info", underline=0, font=15, center=False)
+        self.graph_tab = DropdownItem(pygame.Rect(196, 8, 47, 19), 3, "Graph", underline=0, font=15, center=False)
 
         self.reset_button = Button(w=90, pos=(16, 39), center=True)
         self.start_stop_button = Button(w=80, pos=(130, 39), center=True)
@@ -100,6 +102,9 @@ class PlayEvolutionaryTournamentScene(Scene):
         self.speed_inside_im = pygame.image.load("Images/speedometer_inside.png")
         self.speed_inside_im = pygame.transform.smoothscale(self.speed_inside_im, (15, 15))
         self.speed_slider = Slider((465, 57), 240, fro=5, to=100)
+
+        self.load_button = Button(w=208, pos=(18, 39), center=True)
+        self.new_experiment_button = Button(w=279, pos=(250, 39), center=True)
 
         self.shift = False
         self.check_shift = True
@@ -137,8 +142,7 @@ class PlayEvolutionaryTournamentScene(Scene):
         for agent in self.blobs:
             w, h = pygame.display.get_window_size()
             if 0 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[0] < w + self.blobs[agent].radius / 2:
-                if 87 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[1] < h + self.blobs[
-                    agent].radius / 2:
+                if 87 - self.blobs[agent].radius / 2 < self.blobs[agent].get_pos()[1] < h + self.blobs[agent].radius / 2:
                     if self.blobs[agent].show_name:
                         render_after.append(agent)
                     if agent in [self.tournament.giver_agent, self.tournament.receiver_agent]:
@@ -170,13 +174,15 @@ class PlayEvolutionaryTournamentScene(Scene):
         pygame.draw.rect(screen, (30, 30, 30), (0, 0, 100000, 85))
 
         self.home_tab.render(screen)
+        self.edit_tab.render(screen)
         self.info_tab.render(screen)
+        self.graph_tab.render(screen)
 
         if self.tab == 0:
             self.reset_button.render(screen, "Reset")
             # self.prev_button.render(screen, "Prev")
             if not self.running:
-                self.start_stop_button.render(screen, "Start")
+                self.start_stop_button.render(screen, "Play")
             else:
                 self.start_stop_button.render(screen, "Stop")
             self.next_button.render(screen, "Next")
@@ -189,6 +195,9 @@ class PlayEvolutionaryTournamentScene(Scene):
             speed_label = self.font.render(str(self.speed), True, (255, 255, 255))
             screen.blit(speed_label, (729, 44))
         elif self.tab == 1:
+            self.load_button.render(screen, "Load Experiment")
+            self.new_experiment_button.render(screen, "Create New Experiment")
+        elif self.tab == 2:
             generation_label = self.font2.render(
                 f"{self.tournament.generation} Generation / {self.total_generations} Generations",
                 True, (255, 255, 255))
@@ -207,6 +216,11 @@ class PlayEvolutionaryTournamentScene(Scene):
             encounter_type_label = self.font2.render(f"Encounter type: {self.tournament.encounter_type}",
                                                      True, (255, 255, 255))
             screen.blit(encounter_type_label, (544, 58))
+        elif self.tab == 3:
+            pass
+            # self.show_statistics_button.render(screen, "Player 1 statistics")
+            # self.show_statistics_button2.render(screen, "Player 2 statistics")
+            # self.show_statistics_button3.render(screen, "Overall statistics")
 
         pygame.draw.line(screen, (247, 95, 23), (0, 85), (100000, 85), 2)
 
@@ -286,7 +300,9 @@ class PlayEvolutionaryTournamentScene(Scene):
             self.speed = int(self.speed_slider.number)
 
         self.home_tab.update(self.tab == self.home_tab.index)
+        self.edit_tab.update(self.tab == self.edit_tab.index)
         self.info_tab.update(self.tab == self.info_tab.index)
+        self.graph_tab.update(self.tab == self.graph_tab.index)
 
         self.timeline.update(self.tournament.round)
 
@@ -305,7 +321,7 @@ class PlayEvolutionaryTournamentScene(Scene):
                         self.running = False
 
             for agent in self.blobs:
-                self.blobs[agent].handle_events(event, manager=self.manager, round=self.tournament.round)
+                self.blobs[agent].handle_events(event, manager=self.manager, round=self.tournament.time_stamp)
 
             if self.tab == 0:
                 self.speed_slider.handle_events(event)
@@ -321,6 +337,11 @@ class PlayEvolutionaryTournamentScene(Scene):
                         self.new_generation = True
                         self.was_running = self.running
                         self.running = False
+            elif self.tab == 1:
+                if self.load_button.handle_events(event):
+                    self.manager.go_to("SelectFileScene")
+                if self.new_experiment_button.handle_events(event):
+                    self.manager.go_to("SelectAgentsScene")
 
             if self.check_shift:
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -382,8 +403,12 @@ class PlayEvolutionaryTournamentScene(Scene):
                 if pygame.key.get_mods() and pygame.KMOD_ALT:
                     if event.key == pygame.K_h:
                         self.tab = self.home_tab.index
+                    if event.key == pygame.K_e:
+                        self.tab = self.edit_tab.index
                     if event.key == pygame.K_i:
                         self.tab = self.info_tab.index
+                    if event.key == pygame.K_g:
+                        self.tab = self.graph_tab.index
                 if event.key == pygame.K_SPACE:
                     self.running = not self.running
                 if event.key == pygame.K_RIGHT:
@@ -394,8 +419,12 @@ class PlayEvolutionaryTournamentScene(Scene):
 
             if self.home_tab.handle_events(event):
                 self.tab = self.home_tab.index
+            if self.edit_tab.handle_events(event):
+                self.tab = self.edit_tab.index
             if self.info_tab.handle_events(event):
                 self.tab = self.info_tab.index
+            if self.graph_tab.handle_events(event):
+                self.tab = self.graph_tab.index
 
             if info := self.timeline.handle_events(event):
                 self.tournament.round, self.generation = info

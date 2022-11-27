@@ -3,7 +3,7 @@ from .Agent import Agent
 
 
 class EvolutionaryTournament:
-    def __init__(self, file_name="./trail1eventHistory.pl"):
+    def __init__(self, file_name):
         self.file_name = file_name
         self.total_rounds = 0
         self.total_giving_encounters = 0

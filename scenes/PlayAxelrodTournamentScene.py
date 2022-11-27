@@ -344,7 +344,7 @@ class PlayAxelrodTournamentScene(Scene):
                         self.running = False
 
             for agent in self.blobs:
-                self.blobs[agent].handle_events(event, self.manager, self.tournament.round)
+                self.blobs[agent].handle_events(event, self.manager, self.tournament.time_stamp)
 
             if self.tab == 0:
                 self.speed_slider.handle_events(event)

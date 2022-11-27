@@ -47,3 +47,4 @@ class SceneManager(object):
         """Changes to previous scene"""
         self.scene = self.previous.pop(-1)
         self.scene.manager = self
+        self.tk.withdraw()

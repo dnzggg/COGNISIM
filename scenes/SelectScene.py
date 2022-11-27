@@ -89,8 +89,10 @@ class SelectScene(Scene):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.one:
-                    self.manager.go_to("SelectFileScene")
+                    self.manager.go_to("SelectFileScene", "Evolutionary")
                 if self.two:
                     self.manager.go_to("SelectAgentsScene")
                 if self.three:
-                    self.manager.go_to("PlayEvolutionaryTournamentScene")
+                    self.manager.go_to("SelectFileScene", "Axelrod")
+                if self.four:
+                    self.manager.go_to("SelectAgentsScene")
