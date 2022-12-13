@@ -4,7 +4,7 @@ from pygame import gfxdraw
 from objects import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem, TextButton
 
 
-class SelectAgentsScene(Scene):
+class SelectEvolutionaryAgentsScene(Scene):
     """Select agents scene where the user can select the amount of agents and number of rounds.
 
     Attributes
@@ -58,9 +58,10 @@ class SelectAgentsScene(Scene):
         self.back_button = TextButton(pos=(16, 16), w=69, h=25, font_size=21)
 
         self.player_label = self.font.render("Player Agent", True, (255, 255, 255))
-        self.gossip_type_list = ["Fair", "Selection 2", "Selection 3", "Selection 4", "Selection 5", "Selection 6"]
+        self.gossip_type_list = ["Fair", "Biased", "All Good", "All Bad"]
         self.gossip_type_dropdown = Dropdown("Gossip Type", w=131, pos=(545, 16), selections=self.gossip_type_list)
-        self.discrimination_type_list = ["Cooperator", "Stern", "Defector", "Selection 4", "Selection 5", "Selection 6"]
+        self.discrimination_type_list = ["Intrinsic Cooperator", "Stern Discriminator", "Generous Discriminator",
+                                         "Intrinsic Defector", "Unconditional Cooperator", "Unconditional Defector"]
         self.discrimination_type_dropdown = Dropdown("Discrimination Type", w=193, pos=(741, 16), selections=self.discrimination_type_list)
 
         self.discrimination_threshold_label = self.font2.render("Discrimination Threshold (-5 to 5.5):", True, (255, 255, 255))
@@ -89,8 +90,6 @@ class SelectAgentsScene(Scene):
         self.scroll = HorizontalScroll(items=self.chips, pos=(16, 139))
 
         self.conductor_label = self.font.render("Conductor Agent", True, (255, 255, 255))
-        self.number_of_conductors_label = self.font2.render("Number of Conductors:", True, (255, 255, 255))
-        self.number_of_conductors_input = InputBox((460, 221), w=101, h=27, text="1000")
         self.number_of_rounds_label = self.font2.render("Total Number of Rounds:", True, (255, 255, 255))
         self.number_of_rounds_input = InputBox((833, 221), w=101, h=27, text="1000")
         self.giving_encounters_label = self.font2.render("Total Giving Encounters:", True, (255, 255, 255))
@@ -120,11 +119,8 @@ class SelectAgentsScene(Scene):
         self.evolution_type_list = ["Cultural", "Genetic", "Selection 3", "Selection 4", "Selection 5", "Selection 6"]
         self.evolution_type_dropdown = Dropdown("Evolution Type", w=157, pos=(777, 326), selections=self.evolution_type_list)
 
-        self.generation_range_label = self.font.render("Generation Range", True, (255, 255, 255))
-        self.min_generation_range_label = self.font2.render("Minimum Generation Range:", True, (255, 255, 255))
-        self.min_generation_range_input = InputBox((246, 468), w=101, h=27, text="-5", negative=True)
-        self.max_generation_range_label = self.font2.render("Maximum Generation Range:", True, (255, 255, 255))
-        self.max_generation_range_input = InputBox((246, 507), w=101, h=27, text="5")
+        self.number_of_generations_label = self.font2.render("Total Number of Generations:", True, (255, 255, 255))
+        self.number_of_generations_input = InputBox((833, 221), w=101, h=27, text="10")
 
         self.image_score_range_label = self.font.render("Image Score Range", True, (255, 255, 255))
         self.min_image_score_range_label = self.font2.render("Minimum Image Score:", True, (255, 255, 255))
@@ -133,6 +129,13 @@ class SelectAgentsScene(Scene):
         self.max_image_score_range_input = InputBox((680, 507), w=101, h=27, text="5")
 
         self.start_button = Button(w=80, pos=(854, 499), center=True)
+
+        self.inputs = [self.number_of_rounds_input, self.giving_encounters_input, self.max_image_score_range_input,
+                       self.gossip_encounters_input, self.events_file_name_input, self.results_file_name_input,
+                       self.benefit_cooperation_input, self.cost_cooperation_input, self.start_time_input,
+                       self.number_of_generations_input, self.min_image_score_range_input,
+                       ]
+        self.illegal_input = None
 
     def change_starting_order(self):
         self.starting_order = not self.starting_order
@@ -174,8 +177,6 @@ class SelectAgentsScene(Scene):
         gfxdraw.aacircle(screen, 934, 201, 2, (247, 95, 23))
 
         screen.blit(self.conductor_label, (16, 222))
-        screen.blit(self.number_of_conductors_label, (275, 225))
-        self.number_of_conductors_input.render(screen)
         screen.blit(self.number_of_rounds_label, (638, 225))
         self.number_of_rounds_input.render(screen)
         screen.blit(self.giving_encounters_label, (322, 264))
@@ -212,11 +213,8 @@ class SelectAgentsScene(Scene):
         gfxdraw.filled_circle(screen, 934, 411, 2, (247, 95, 23))
         gfxdraw.aacircle(screen, 934, 411, 2, (247, 95, 23))
 
-        screen.blit(self.generation_range_label, (16, 431))
-        screen.blit(self.min_generation_range_label, (16, 472))
-        self.min_generation_range_input.render(screen)
-        screen.blit(self.max_generation_range_label, (16, 511))
-        self.max_generation_range_input.render(screen)
+        screen.blit(self.number_of_generations_label, (16, 431))
+        self.number_of_generations_input.render(screen)
 
         pygame.draw.line(screen, (247, 95, 23), (421, 412), (421, 534), 5)
         gfxdraw.filled_circle(screen, 421, 534, 2, (247, 95, 23))
@@ -244,10 +242,16 @@ class SelectAgentsScene(Scene):
                 chip = Chip(item, pos=(start, 0))
                 self.chips.append(chip)
                 start += chip.rect.w + 16
+
         self.scroll.update(self.chips)
         self.gossip_type_dropdown.update()
         self.discrimination_type_dropdown.update()
         self.evolution_type_dropdown.update()
+
+        self.illegal_input = None
+        for i in self.inputs:
+            if i.active and i.text == "":
+                self.illegal_input = i
 
     def handle_events(self, events):
         """Handles all the objects events, and when the button is pressed will move to the next scene"""
@@ -260,28 +264,25 @@ class SelectAgentsScene(Scene):
             active = active or self.gossip_type_dropdown.handle_events(event)
 
             if not active:
-                self.discrimination_threshold_input.handle_events(event)
-                self.gossip_weight_input.handle_events(event)
-                self.trust_criteria_input.handle_events(event)
-                self.number_of_players_input.handle_events(event)
-                self.number_of_conductors_input.handle_events(event)
-                self.number_of_rounds_input.handle_events(event)
-                self.giving_encounters_input.handle_events(event)
-                self.gossip_encounters_input.handle_events(event)
-                self.events_file_name_input.handle_events(event)
-                self.results_file_name_input.handle_events(event)
-                self.benefit_cooperation_input.handle_events(event)
-                self.cost_cooperation_input.handle_events(event)
-                self.start_time_input.handle_events(event)
-                self.min_image_score_range_input.handle_events(event)
-                self.min_generation_range_input.handle_events(event)
-                self.max_image_score_range_input.handle_events(event)
-                self.max_generation_range_input.handle_events(event)
+                self.discrimination_threshold_input.handle_events(event, self.illegal_input)
+                self.gossip_weight_input.handle_events(event, self.illegal_input)
+                self.trust_criteria_input.handle_events(event, self.illegal_input)
+                self.number_of_players_input.handle_events(event, self.illegal_input)
+                self.number_of_rounds_input.handle_events(event, self.illegal_input)
+                self.giving_encounters_input.handle_events(event, self.illegal_input)
+                self.gossip_encounters_input.handle_events(event, self.illegal_input)
+                self.events_file_name_input.handle_events(event, self.illegal_input)
+                self.results_file_name_input.handle_events(event, self.illegal_input)
+                self.benefit_cooperation_input.handle_events(event, self.illegal_input)
+                self.cost_cooperation_input.handle_events(event, self.illegal_input)
+                self.start_time_input.handle_events(event, self.illegal_input)
+                self.min_image_score_range_input.handle_events(event, self.illegal_input)
+                self.max_image_score_range_input.handle_events(event, self.illegal_input)
 
                 if self.back_button.handle_events(event):
                     self.manager.go_back()
 
-                if self.add_button.handle_events(event):
+                if self.add_button.handle_events(event) and not self.illegal_input:
                     discrimination_type = self.discrimination_type_list[self.discrimination_type_dropdown.selected]
                     discrimination_threshold = self.discrimination_threshold_input.get_text()
                     gossip_type = self.gossip_type_list[self.gossip_type_dropdown.selected]
@@ -296,7 +297,7 @@ class SelectAgentsScene(Scene):
                          "g_w": gossip_weight, "t_c": trust_criteria, "s_a": self_advertisement,
                          "n": number_of_players})
 
-                if self.start_button.handle_events(event):
+                if self.start_button.handle_events(event) and not self.illegal_input:
                     for item in self.added:
                         items = list(item.values())
                         items = ','.join(items)
@@ -304,14 +305,14 @@ class SelectAgentsScene(Scene):
                     giving = "on" if self.starting_order else "off"
                     gossip = "off" if self.starting_order else "on"
                     items = ','.join(
-                        [self.number_of_conductors_input.get_text(), "1", self.number_of_rounds_input.get_text(), "1",
+                        ["1", self.number_of_rounds_input.get_text(), "1",
                          self.giving_encounters_input.get_text(), self.gossip_encounters_input.get_text(), giving,
                          gossip, "active"])
                     print("make(1,conductor(0," + items + ")),")
                     print("set(imagescorerange(" + self.min_image_score_range_input.get_text() + "," + self.max_image_score_range_input.get_text() + ")),")
                     print("set(cooperationcost(" + self.cost_cooperation_input.get_text() + ")),")
                     print("set(cooperationbenefit(" + self.benefit_cooperation_input.get_text() + ")),")
-                    print("set(generationinfo(" + self.min_generation_range_input.get_text() + "," + self.max_generation_range_input.get_text() + ")),")
+                    print("set(generationinfo(" + self.number_of_generations_input.get_text() + ")),")
                     print("set(starttime(" + self.start_time_input.get_text() + ")),")
                     print("set(evolutiontype(" + self.evolution_type_list[self.evolution_type_dropdown.selected] + ")),")
                     print("output(resultsin('" + self.results_file_name_input.get_text() + "')),")

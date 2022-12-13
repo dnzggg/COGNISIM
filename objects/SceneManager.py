@@ -23,6 +23,12 @@ class SceneManager(object):
         self.graphs = dict()
         self.previous = list()
 
+    def __call__(self):
+        """Calls the scene"""
+        self.go_to("SelectScene")
+        self.graphs = dict()
+        self.previous = list()
+
     def go_to(self, scene, args=None):
         """Changes to scene
 

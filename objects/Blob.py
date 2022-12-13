@@ -221,8 +221,8 @@ class Blob:
         self.listbox2.insert(tkinter.END, "Action ")
         self.listbox2.insert(tkinter.END, "Belief ")
         self.listbox2.insert(tkinter.END, "Goal ")
-        self.listbox2.insert(tkinter.END, "Need ")
-        self.listbox2.insert(tkinter.END, "Plan ")
+        # self.listbox2.insert(tkinter.END, "Need ")
+        # self.listbox2.insert(tkinter.END, "Plan ")
         scrollbar2.config(command=self.listbox2.yview)
 
         label5 = tkinter.Label(frame, text="What", bg="#333", fg="white", font=("Montserrat", 10))

@@ -91,8 +91,8 @@ class SelectScene(Scene):
                 if self.one:
                     self.manager.go_to("SelectFileScene", "Evolutionary")
                 if self.two:
-                    self.manager.go_to("SelectAgentsScene")
+                    self.manager.go_to("SelectEvolutionaryAgentsScene")
                 if self.three:
                     self.manager.go_to("SelectFileScene", "Axelrod")
                 if self.four:
-                    self.manager.go_to("SelectAgentsScene")
+                    self.manager.go_to("SelectAxelrodAgentsScene")

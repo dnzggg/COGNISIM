@@ -45,7 +45,7 @@ class PlayAxelrodTournamentScene(Scene):
         List of agents
     playing_agents: list
         List of playing agents
-    reset_button: Button
+    back_button: Button
         Button object to reset the game (return to the previous page)
     speed_slider: Slider
         Slider object to handle the simulation speed
@@ -94,9 +94,10 @@ class PlayAxelrodTournamentScene(Scene):
         self.info_tab = DropdownItem(pygame.Rect(143, 8, 29, 19), 2, "Info", underline=0, font=15, center=False)
         self.graph_tab = DropdownItem(pygame.Rect(196, 8, 47, 19), 3, "Graph", underline=0, font=15, center=False)
 
-        self.reset_button = Button(w=90, pos=(16, 39), center=True)
-        self.start_stop_button = Button(w=80, pos=(130, 39), center=True)
-        self.next_button = Button(w=80, pos=(234, 39), center=True)
+        self.back_button = Button(w=80, pos=(133, 39), center=True)
+        self.home_button = Button(w=93, pos=(16, 39), center=True)
+        self.start_stop_button = Button(w=80, pos=(237, 39), center=True)
+        self.next_button = Button(w=80, pos=(341, 39), center=True)
         self.show_statistics_button = Button(w=275, pos=(16, 39), center=True)
         self.show_statistics_button2 = Button(w=275, pos=(216, 39), center=True)
         self.show_statistics_button3 = Button(w=275, pos=(416, 39), center=True)
@@ -106,7 +107,7 @@ class PlayAxelrodTournamentScene(Scene):
         self.speed_outside_im = pygame.transform.smoothscale(self.speed_outside_im, (30, 30))
         self.speed_inside_im = pygame.image.load("Images/speedometer_inside.png")
         self.speed_inside_im = pygame.transform.smoothscale(self.speed_inside_im, (15, 15))
-        self.speed_slider = Slider((465, 57), 240, fro=5, to=100)
+        self.speed_slider = Slider((572, 57), 240, fro=5, to=100)
 
         self.load_button = Button(w=208, pos=(18, 39), center=True)
         self.new_experiment_button = Button(w=279, pos=(250, 39), center=True)
@@ -205,7 +206,8 @@ class PlayAxelrodTournamentScene(Scene):
         self.graph_tab.render(screen)
 
         if self.tab == 0:
-            self.reset_button.render(screen, "Reset")
+            self.back_button.render(screen, "Back")
+            self.home_button.render(screen, "Home")
             # self.prev_button.render(screen, "Prev")
             if not self.running:
                 self.start_stop_button.render(screen, "Play")
@@ -213,13 +215,13 @@ class PlayAxelrodTournamentScene(Scene):
                 self.start_stop_button.render(screen, "Stop")
             self.next_button.render(screen, "Next")
 
-            screen.blit(self.speed_label, (338, 42))
-            screen.blit(self.speed_outside_im, (412, 42))
+            screen.blit(self.speed_label, (445, 42))
+            screen.blit(self.speed_outside_im, (519, 42))
             speed_inside_im = rot_center(self.speed_inside_im, -(abs(self.speed) * 2.7 - 135))
-            screen.blit(speed_inside_im, (419, 51))
+            screen.blit(speed_inside_im, (526, 51))
             self.speed_slider.render(screen)
             speed_label = self.font.render(str(self.speed), True, (255, 255, 255))
-            screen.blit(speed_label, (729, 44))
+            screen.blit(speed_label, (836, 44))
         elif self.tab == 1:
             self.load_button.render(screen, "Load Experiment")
             self.new_experiment_button.render(screen, "Create New Experiment")
@@ -349,8 +351,11 @@ class PlayAxelrodTournamentScene(Scene):
             if self.tab == 0:
                 self.speed_slider.handle_events(event)
 
-                if self.reset_button.handle_events(event):
+                if self.back_button.handle_events(event):
                     self.manager.go_back()
+
+                if self.home_button.handle_events(event):
+                    self.manager()
 
                 if self.start_stop_button.handle_events(event):
                     self.running = not self.running
@@ -365,9 +370,9 @@ class PlayAxelrodTournamentScene(Scene):
                         self.running = False
             elif self.tab == 1:
                 if self.load_button.handle_events(event):
-                    self.manager.go_to("SelectFileScene")
+                    self.manager.go_to("SelectFileScene", "Axelrod")
                 if self.new_experiment_button.handle_events(event):
-                    self.manager.go_to("SelectAgentsScene")
+                    self.manager.go_to("SelectEvolutionaryAgentsScene")
             elif self.tab == 3:
                 if self.show_statistics_button.handle_events(event):
                     belief = self.tournament.get_agents_data()

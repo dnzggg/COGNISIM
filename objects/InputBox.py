@@ -101,7 +101,7 @@ class InputBox:
 
         return self.text
 
-    def handle_events(self, event):
+    def handle_events(self, event, active):
         """If it is clicked activates the box, and if it is active and a key is pressed updates the text inside
 
         Parameters
@@ -111,14 +111,30 @@ class InputBox:
         """
         self.history = self.history[-1000:]
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if self.rect.collidepoint(event.pos[0], event.pos[1]):
+            if self.rect.collidepoint(event.pos[0], event.pos[1]) and (self == active or active is None):
                 self.active = True
+                self.color = self.active_color
             else:
-                self.active = False
-            self.color = self.active_color if self.active else self.inactive_color
+                if self.text != "":
+                    self.active = False
+                    self.color = self.inactive_color
+                else:
+                    self.color = (255, 0, 0)
+                    pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+            if not self.active:
+                return True
 
         if event.type == pygame.KEYDOWN:
             if self.active:
+                if event.key == pygame.K_RETURN:
+                    if self.text != "":
+                        self.active = False
+                        self.color = self.inactive_color
+                        return True
+                    else:
+                        self.color = (255, 0, 0)
+                        pygame.time.set_timer(self.BACK_TO_NORMAL, 600)
+
                 if pygame.key.get_mods() and pygame.KMOD_CTRL and event.key == pygame.K_z:
                     try:
                         if self.text != (temp := self.history.pop(-1)):
