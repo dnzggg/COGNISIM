@@ -26,6 +26,7 @@ class StartScene(Scene):
     """
     def __init__(self):
         Scene.__init__(self)
+        pygame.font.init()
         self.font = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 38)
 
         self.button = Button(font_size=21, w=349, center=True)

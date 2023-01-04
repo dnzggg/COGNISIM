@@ -38,11 +38,22 @@ class Screen:
         width:
         height:
         """
+        self.manager = SceneManager()
+        tk = tkinter.Tk()
+        tk.withdraw()
+        # self.main_dialog = tkinter.Frame(tk)
+        # self.main_dialog.pack_forget()
+        tk.geometry("900x300+0+0")
+        tk.protocol("WM_DELETE_WINDOW", self.on_closing)
+        tk.configure(background='#333')
+        self.manager.tk = tk
+        # self.manager.main_dialog = self.main_dialog
+
+        pygame.init()
         self.__w = width
         self.__h = height
         self.__screen = pygame.display.set_mode((width, height))
         self.__cont = True
-        self.manager = SceneManager()
 
         icon = pygame.image.load("Images/logo.png")
         pygame.display.set_icon(icon)
@@ -52,22 +63,10 @@ class Screen:
 
     def start(self):
         """Start the tkinter window to display graphs and control both tkinter and pygame"""
-        tk = tkinter.Tk()
-        tk.withdraw()
-        main_dialog = tkinter.Frame(tk)
-        main_dialog.pack_forget()
-        tk.geometry("900x300+0+0")
-        tk.protocol("WM_DELETE_WINDOW", self.on_closing)
-        tk.configure(background='#333')
-        tk.wm_attributes('-transparentcolor', '#abcabc')
-        self.manager.tk = tk
-        self.manager.main_dialog = main_dialog
 
         while self.__cont:
-            try:
-                main_dialog.update()
-            except:
-                print("tkinter window closed")
+            self.manager.tk.update()
+
             try:
                 self.manager.scene.handle_events(pygame.event.get())
             except QuitException:
@@ -78,12 +77,10 @@ class Screen:
             self.manager.scene.clock.tick(144)
             pygame.display.update()
 
-        main_dialog.destroy()
+        self.manager.tk.destroy()
 
 
 if __name__ == "__main__":
-    pygame.init()
-    pygame.display.init()
     screen = Screen(950, 550)
     screen.start()
     pygame.display.quit()

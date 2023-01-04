@@ -37,6 +37,11 @@ class SceneManager(object):
         scene: Scene
             scene that it will change to
         """
+        try:
+            # self.tk.deiconify()
+            self.tk.withdraw()
+        except AttributeError:
+            pass
         module = import_module("scenes." + scene)
         if args is None:
             scene = getattr(module, scene)()

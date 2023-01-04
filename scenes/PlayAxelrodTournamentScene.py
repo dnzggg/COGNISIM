@@ -6,6 +6,8 @@ import pygame
 from components import AxelrodTournament
 from objects import Blob, Button, Scene, DropdownItem, Slider
 
+from sys import platform
+
 matplotlib.use('Qt5Agg')
 from matplotlib import pyplot as plt
 
@@ -65,8 +67,9 @@ class PlayAxelrodTournamentScene(Scene):
     """
     def __init__(self, file_name):
         Scene.__init__(self)
-        size = pygame.display.get_window_size()
-        pygame.display.set_mode((size[0], size[1]), pygame.RESIZABLE)
+        if platform != "darwin":
+            size = pygame.display.get_window_size()
+            pygame.display.set_mode((size[0], size[1]), pygame.RESIZABLE)
 
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
