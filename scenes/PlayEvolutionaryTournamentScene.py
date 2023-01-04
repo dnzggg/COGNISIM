@@ -1,6 +1,6 @@
 import pygame
 
-from objects import Blob, Button, Scene, DropdownItem, Slider, MessageBox, PositionDict, Timeline
+from objects import Blob, Button, Scene, DropdownItem, Slider, Timeline
 
 from components import EvolutionaryTournament
 

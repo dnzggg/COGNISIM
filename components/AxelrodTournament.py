@@ -9,7 +9,7 @@ class AxelrodTournament:
         self.file_name = file_name
         self.chunks = None
         self.total_rounds = 0
-        self.time_stamp = 1
+        self.time_stamp = 2
         self.total_time_stamp = 0
         self.total_cooperation = 0
         self.round = 0
@@ -17,8 +17,8 @@ class AxelrodTournament:
         self.encounter_type = "Gossip"
         self._agents = []
         self._conductor = None
-        self.player1 = None
-        self.player2 = None
+        self.p1 = self.player1 = None
+        self.p2 = self.player2 = None
         self.cooperate = None
         self.belief_lines = []
         self.belief = {"time": [], "agents": {"overall": []}}
@@ -82,52 +82,66 @@ class AxelrodTournament:
 
     def run(self):
         for line in self.chunks[0]:
-            if re.search(r"^happens_at\(perform\(.*\)," + str(self.time_stamp) + r"\)\.$", line) and self.round < self.total_rounds:
+            if re.search(r"^happens_at\(perform\(.*inform.*\)," + str(self.time_stamp) + r"\)\.$",
+                         line) and self.round < self.total_rounds:
                 self.belief["time"].append(self.belief["time"][-1] + 1)
                 self.update_belief()
                 if self.perform_line(line):
                     yield
 
     def perform_line(self, line):
-        if m := re.search(r"^happens_at\(perform\(actuator" + self._conductor.name + r",performEnc\(" +
-                          self._conductor.name + r",\[(.*)\].*\)," + str(self.time_stamp) + r"\)\.$", line):
-            player = m.group(1)
-            if i := re.search(r"^twinplayer(.*)", player):
-                p = self._agents[int(i.group(1)) - 1]
-                player = Agent(p.index, "twin" + p.name, p.strategy)
-            else:
-                i = re.search(r"^player(.*)", player).group(1)
-                player = self._agents[int(i) - 1]
-            if not self.player1:
-                self.time_stamp += 1
-                self.player1 = player
+        print(line)
+        # if m := re.search(r"^happens_at\(perform\(actuator" + self._conductor.name + r",performEnc\(" +
+        #                   self._conductor.name + r",\[(.*)\].*\)," + str(self.time_stamp) + r"\)\.$", line):
+        #     player = m.group(1)
+        #     if i := re.search(r"^twinplayer(.*)", player):
+        #         p = self._agents[int(i.group(1)) - 1]
+        #         player = Agent(p.index, "twin" + p.name, p.strategy)
+        #     else:
+        #         i = re.search(r"^player(.*)", player).group(1)
+        #         player = self._agents[int(i) - 1]
+        #     if not self.player1:
+        #         self.player1 = player
+        #         self.round += 1
+        #         return True
+        #     else:
+        #         self.player2 = player
+        #         return True
+        try:
+            if m := re.search(r"^happens_at\(perform\(actuator" + self.p2.name + r",inform\(" + self.p2.name +
+                              r",\[.*\],encounter\d+,(.*)\(" + self.p1.name + "\)\)\)," + str(self.time_stamp) +
+                              r"\)\.$", line):
+                if m.group(1) == "cooperate" and self.cooperate is not False:
+                    self.cooperate = True & self.cooperate
+                else:
+                    self.cooperate = False
+                if self.cooperate:
+                    self.total_cooperation += 1
                 self.round += 1
+                self.time_stamp += 3
+                self.p1 = self.p2 = None
                 return True
-            else:
-                self.player2 = player
-                return True
-        elif m := re.search(r"^happens_at\(perform\(actuator" + self.player1.name + r",inform\(" + self.player1.name +
-                            r",\[.*\],encounter\d+,(.*)\(" + self.player2.name + "\)\)\)," + str(self.time_stamp) +
-                            r"\)\.$", line):
-            if m.group(1) == "cooperate" and self.cooperate is not False:
+        except AttributeError:
+            if m := re.search(r"^happens_at\(perform\(actuator(.*),inform\(\1,\[.*\],encounter\d+,(.*)\((.*)\)\)\)," +
+                              str(self.time_stamp) + r"\)\.$", line):
                 self.cooperate = True
-            else:
-                self.cooperate = False
-            self.time_stamp += 1
-        elif m := re.search(r"^happens_at\(perform\(actuator" + self.player2.name + r",inform\(" + self.player2.name +
-                r",\[.*\],encounter\d+,(.*)\(" + self.player1.name + "\)\)\)," + str(self.time_stamp) + r"\)\.$", line):
-            if m.group(1) == "cooperate" and self.cooperate is not False:
-                self.cooperate = True
-            else:
-                self.cooperate = False
-            self.time_stamp += 1
-            return True
-        elif m := re.search(r"^happens_at\(perform\(actuator" + self._conductor.name + r",resultEnc\(" +
-                            self._conductor.name + r",\[(.*)\].*\)," + str(self.time_stamp) + r"\)\.$", line):
-            self.time_stamp += 1
-            self.player1 = self.player2 = None
-            self.cooperate = None
-            return True
+                player1 = m.group(1)
+                self.p1 = self.player1 = self._get_agent_from_string(player1)
+                player2 = m.group(3)
+                self.p2 = self.player2 = self._get_agent_from_string(player2)
+                if m.group(2) == "cooperate" and self.cooperate is not False:
+                    self.cooperate = True
+                else:
+                    self.cooperate = False
+                self.time_stamp += 1
+
+    def _get_agent_from_string(self, player):
+        if i := re.search(r"^twinplayer(.*)", player):
+            p = self._agents[int(i.group(1)) - 1]
+            return Agent(p.index, "twin" + p.name, p.strategy)
+        else:
+            i = re.search(r"^player(.*)", player).group(1)
+            return self._agents[int(i) - 1]
 
     def get_agents(self):
         return self._agents
