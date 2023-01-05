@@ -1,5 +1,9 @@
+import os
+import re
+
 import pygame
 from pygame import gfxdraw
+from pyswip import Prolog
 
 from objects import Button, InputBox, RadioButton, Scene, Dropdown, HorizontalScroll, Chip, DropdownItem, TextButton
 
@@ -50,11 +54,12 @@ class SelectEvolutionaryAgentsScene(Scene):
     handle_events(events)
         Handles all the objects events, and when the button is pressed will move to the next scene
     """
-    def __init__(self):
+    def __init__(self, exp_name=None):
         Scene.__init__(self)
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
 
+        self.execute_button = Button(w=111, pos=(823, 499), font_size=21)
         self.back_button = TextButton(pos=(16, 16), w=69, h=25, font_size=21)
 
         self.player_label = self.font.render("Player Agent", True, (255, 255, 255))
@@ -137,6 +142,8 @@ class SelectEvolutionaryAgentsScene(Scene):
                        ]
         self.illegal_input = None
 
+        self.exp_name = exp_name
+
     def change_starting_order(self):
         self.starting_order = not self.starting_order
 
@@ -147,8 +154,6 @@ class SelectEvolutionaryAgentsScene(Scene):
         """Renders the radio buttons for components selection, labels for description, input boxes to get the values,
                 and the button"""
         Scene.render(self, screen)
-
-        self.back_button.render(screen, "Back")
 
         screen.blit(self.player_label, (344, 16))
         screen.blit(self.discrimination_threshold_label, (19, 103))
@@ -232,6 +237,16 @@ class SelectEvolutionaryAgentsScene(Scene):
         self.evolution_type_dropdown.render(screen)
         self.gossip_type_dropdown.render(screen)
 
+        if self.exp_name:
+            (w, h) = pygame.display.get_window_size()
+            transparent_surface = pygame.Surface((w, h), pygame.SRCALPHA)
+            transparent_surface.fill((255, 255, 255, 100))
+            screen.blit(transparent_surface, (0, 0))
+
+            self.execute_button.render(screen, "Execute")
+
+        self.back_button.render(screen, "Back")
+
     def update(self):
         """Update input box text, and radio buttons"""
         if self.agents != self.agents2:
@@ -258,72 +273,101 @@ class SelectEvolutionaryAgentsScene(Scene):
         Scene.handle_events(self, events)
 
         for event in events:
-            active = False
-            active = active or self.discrimination_type_dropdown.handle_events(event)
-            active = active or self.evolution_type_dropdown.handle_events(event)
-            active = active or self.gossip_type_dropdown.handle_events(event)
+            if self.back_button.handle_events(event):
+                self.manager.go_back()
 
-            if not active:
-                self.discrimination_threshold_input.handle_events(event, self.illegal_input)
-                self.gossip_weight_input.handle_events(event, self.illegal_input)
-                self.trust_criteria_input.handle_events(event, self.illegal_input)
-                self.number_of_players_input.handle_events(event, self.illegal_input)
-                self.number_of_rounds_input.handle_events(event, self.illegal_input)
-                self.giving_encounters_input.handle_events(event, self.illegal_input)
-                self.gossip_encounters_input.handle_events(event, self.illegal_input)
-                self.events_file_name_input.handle_events(event, self.illegal_input)
-                self.results_file_name_input.handle_events(event, self.illegal_input)
-                self.benefit_cooperation_input.handle_events(event, self.illegal_input)
-                self.cost_cooperation_input.handle_events(event, self.illegal_input)
-                self.start_time_input.handle_events(event, self.illegal_input)
-                self.min_image_score_range_input.handle_events(event, self.illegal_input)
-                self.max_image_score_range_input.handle_events(event, self.illegal_input)
+            if not self.exp_name:
+                active = False
+                active = active or self.discrimination_type_dropdown.handle_events(event)
+                active = active or self.evolution_type_dropdown.handle_events(event)
+                active = active or self.gossip_type_dropdown.handle_events(event)
 
-                if self.back_button.handle_events(event):
-                    self.manager.go_back()
+                if not active:
+                    self.discrimination_threshold_input.handle_events(event, self.illegal_input)
+                    self.gossip_weight_input.handle_events(event, self.illegal_input)
+                    self.trust_criteria_input.handle_events(event, self.illegal_input)
+                    self.number_of_players_input.handle_events(event, self.illegal_input)
+                    self.number_of_rounds_input.handle_events(event, self.illegal_input)
+                    self.giving_encounters_input.handle_events(event, self.illegal_input)
+                    self.gossip_encounters_input.handle_events(event, self.illegal_input)
+                    self.events_file_name_input.handle_events(event, self.illegal_input)
+                    self.results_file_name_input.handle_events(event, self.illegal_input)
+                    self.benefit_cooperation_input.handle_events(event, self.illegal_input)
+                    self.cost_cooperation_input.handle_events(event, self.illegal_input)
+                    self.start_time_input.handle_events(event, self.illegal_input)
+                    self.min_image_score_range_input.handle_events(event, self.illegal_input)
+                    self.max_image_score_range_input.handle_events(event, self.illegal_input)
 
-                if self.add_button.handle_events(event) and not self.illegal_input:
-                    discrimination_type = self.discrimination_type_list[self.discrimination_type_dropdown.selected]
-                    discrimination_threshold = self.discrimination_threshold_input.get_text()
-                    gossip_type = self.gossip_type_list[self.gossip_type_dropdown.selected]
-                    gossip_weight = self.gossip_weight_input.get_text()
-                    trust_criteria = self.trust_criteria_input.get_text()
-                    self_advertisement = "yes" if self.self_advertisement else "no"
-                    number_of_players = self.number_of_players_input.get_text()
+                    if self.add_button.handle_events(event) and not self.illegal_input:
+                        discrimination_type = self.discrimination_type_list[self.discrimination_type_dropdown.selected]
+                        discrimination_threshold = self.discrimination_threshold_input.get_text()
+                        gossip_type = self.gossip_type_list[self.gossip_type_dropdown.selected]
+                        gossip_weight = self.gossip_weight_input.get_text()
+                        trust_criteria = self.trust_criteria_input.get_text()
+                        self_advertisement = "yes" if self.self_advertisement else "no"
+                        number_of_players = self.number_of_players_input.get_text()
 
-                    self.agents.append(discrimination_type + " " + str(number_of_players))
-                    self.added.append(
-                        {"d_ty": discrimination_type, "d_th": discrimination_threshold, "g_t": gossip_type,
-                         "g_w": gossip_weight, "t_c": trust_criteria, "s_a": self_advertisement,
-                         "n": number_of_players})
+                        self.agents.append(discrimination_type + " " + str(number_of_players))
+                        self.added.append(
+                            {"d_ty": discrimination_type, "d_th": discrimination_threshold, "g_t": gossip_type,
+                             "g_w": gossip_weight, "t_c": trust_criteria, "s_a": self_advertisement,
+                             "n": number_of_players})
 
-                if self.start_button.handle_events(event) and not self.illegal_input:
-                    for item in self.added:
-                        items = list(item.values())
-                        items = ','.join(items)
-                        print("make(" + item["n"] + ",player(" + items + ")),")
-                    giving = "on" if self.starting_order else "off"
-                    gossip = "off" if self.starting_order else "on"
-                    items = ','.join(
-                        ["1", self.number_of_rounds_input.get_text(), "1",
-                         self.giving_encounters_input.get_text(), self.gossip_encounters_input.get_text(), giving,
-                         gossip, "active"])
-                    print("make(1,conductor(0," + items + ")),")
-                    print("set(imagescorerange(" + self.min_image_score_range_input.get_text() + "," + self.max_image_score_range_input.get_text() + ")),")
-                    print("set(cooperationcost(" + self.cost_cooperation_input.get_text() + ")),")
-                    print("set(cooperationbenefit(" + self.benefit_cooperation_input.get_text() + ")),")
-                    print("set(generationinfo(" + self.number_of_generations_input.get_text() + ")),")
-                    print("set(starttime(" + self.start_time_input.get_text() + ")),")
-                    print("set(evolutiontype(" + self.evolution_type_list[self.evolution_type_dropdown.selected] + ")),")
-                    print("output(resultsin('" + self.results_file_name_input.get_text() + "')),")
-                    print("output(eventsin('" + self.events_file_name_input.get_text() + "'))")
+                    if self.start_button.handle_events(event) and not self.illegal_input:
+                        with open("AEC2.0/domain/GOSSIP_MODEL/config_simulation.pl", "r") as file:
+                            lines = file.readlines()
+                            text = ''.join([i.strip("\t\n ") for i in lines])
 
-                    # self.manager.go_to(PlayTournamentScene())
+                            exp_found = False
+                            experiment_name = 0
+                            while not exp_found:
+                                experiment_name +=1
+                                if not re.findall(f"experiment\(exp({experiment_name}),\(", text):
+                                    exp_found = True
+                            experiment_name = f"exp{experiment_name}"
 
-                self.self_advertisement_radio_no.handle_events(event)
-                self.self_advertisement_radio_yes.handle_events(event)
-                self.starting_order_radio_gossip.handle_events(event)
-                self.starting_order_radio_giving.handle_events(event)
-                if i := self.scroll.handle_events(event):
-                    self.agents.pop(i - 1)
-                    self.added.pop(i - 1)
+                            lines.insert(49, f"experiment({experiment_name},(\n")
+                            lines.insert(50, "set(imagescorerange(" + self.min_image_score_range_input.get_text() + "," + self.max_image_score_range_input.get_text() + ")),\n")
+                            lines.insert(51, "set(cooperationcost(" + self.cost_cooperation_input.get_text() + ")),\n")
+                            lines.insert(52, "set(cooperationbenefit(" + self.benefit_cooperation_input.get_text() + ")),\n")
+                            lines.insert(53, "set(generationinfo(" + self.number_of_generations_input.get_text() + ")),\n")
+                            lines.insert(54, "set(starttime(" + self.start_time_input.get_text() + ")),\n")
+                            lines.insert(55, "set(evolutiontype(" + self.evolution_type_list[self.evolution_type_dropdown.selected] + ")),\n")
+
+                            giving = "on" if self.starting_order else "off"
+                            gossip = "off" if self.starting_order else "on"
+                            items = ','.join(
+                                ["1", self.number_of_rounds_input.get_text(), "1",
+                                 self.giving_encounters_input.get_text(), self.gossip_encounters_input.get_text(), giving,
+                                 gossip, "active"])
+                            lines.insert(56, "make(1,conductor(0," + items + ")),\n")
+
+                            i = 57
+                            for item in self.added:
+                                items = list(item.values())
+                                items = ','.join(items)
+                                lines.insert(i, "make(" + item["n"] + ",player(" + items + ")),\n")
+                                i += 1
+                            lines.insert(i, "output(resultsin('" + self.results_file_name_input.get_text() + "')),\n")
+                            lines.insert(i + 1, "output(eventsin('" + self.events_file_name_input.get_text() + "')))).")
+
+                            fw = open("AEC2.0/domain/GOSSIP_MODEL/config_simulation.pl", "w")
+                            fw.writelines(lines)
+
+                        self.manager.go_to("SelectExecutionScene", "Evolutionary")
+
+                    self.self_advertisement_radio_no.handle_events(event)
+                    self.self_advertisement_radio_yes.handle_events(event)
+                    self.starting_order_radio_gossip.handle_events(event)
+                    self.starting_order_radio_giving.handle_events(event)
+                    if i := self.scroll.handle_events(event):
+                        self.agents.pop(i - 1)
+                        self.added.pop(i - 1)
+            else:
+                if self.execute_button.handle_events(event):
+                    prolog = Prolog()
+                    prolog.consult("/Users/denizgorur/PycharmProjects/COGNISIM/AEC2.0/src/loader_GossipModel.pl")
+                    os.chdir("Evolutionary")
+                    for _ in prolog.query(f"run({self.exp_name})."):
+                        pass
+                    os.chdir("..")

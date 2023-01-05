@@ -2,3 +2,4 @@ pygame
 matplotlib
 numpy
 pyqt5
+pyswip

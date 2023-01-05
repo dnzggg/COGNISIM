@@ -19,7 +19,7 @@ class VerticalScroll:
     render(screen, text)
         Render the button and its text
     """
-    def __init__(self, items=None, pos=(30, 49), w=840, h=486):
+    def __init__(self, items=None, pos=(51, 49), w=840, h=486):
         """
         Parameters
         ----------

@@ -1,3 +1,8 @@
+import os
+import re
+
+from pyswip import Prolog
+
 import pygame
 from pygame import gfxdraw
 
@@ -50,13 +55,14 @@ class SelectAxelrodAgentsScene(Scene):
     handle_events(events)
         Handles all the objects events, and when the button is pressed will move to the next scene
     """
-    def __init__(self):
+    def __init__(self, exp_name=None):
         Scene.__init__(self)
         self.font = pygame.font.Font("Images/Montserrat-Regular.ttf", 21)
         self.font2 = pygame.font.Font("Images/Montserrat-Regular.ttf", 15)
         self.font3 = pygame.font.Font("Images/Montserrat-Regular.ttf", 28)
 
         self.back_button = TextButton(pos=(16, 16), w=69, h=25, font_size=21)
+        self.execute_button = Button(w=111, pos=(823, 499), font_size=21)
 
         self.player_label = self.font.render("Player Agent", True, (255, 255, 255))
         self.strategy_type_list = ["All C", "All D", "Tit For Tat", "Spiteful", "Soft Majo", "Hard Majo", "Per DDC",
@@ -110,6 +116,8 @@ class SelectAxelrodAgentsScene(Scene):
         self.illegal_input = None
 
         self.start_button = Button(w=80, pos=(854, 499), center=True)
+
+        self.exp_name = exp_name
 
     def render(self, screen):
         """Renders the radio buttons for components selection, labels for description, input boxes to get the values,
@@ -217,6 +225,16 @@ class SelectAxelrodAgentsScene(Scene):
 
         self.strategy_type_dropdown.render(screen)
 
+        if self.exp_name:
+            (w, h) = pygame.display.get_window_size()
+            transparent_surface = pygame.Surface((w, h), pygame.SRCALPHA)
+            transparent_surface.fill((255, 255, 255, 100))
+            screen.blit(transparent_surface, (0, 0))
+
+            self.execute_button.render(screen, "Execute")
+
+        self.back_button.render(screen, "Back")
+
     def update(self):
         """Update input box text, and radio buttons"""
         if self.agents != self.agents2:
@@ -240,48 +258,76 @@ class SelectAxelrodAgentsScene(Scene):
         Scene.handle_events(self, events)
 
         for event in events:
-            active = False
-            active = active or self.strategy_type_dropdown.handle_events(event)
+            if self.back_button.handle_events(event):
+                self.manager.go_back()
 
-            if not active:
-                self.number_of_players_input.handle_events(event, self.illegal_input)
-                self.number_of_rounds_input.handle_events(event, self.illegal_input)
-                self.events_file_name_input.handle_events(event, self.illegal_input)
-                self.results_file_name_input.handle_events(event, self.illegal_input)
-                self.start_time_input.handle_events(event, self.illegal_input)
-                if self.s_input.handle_events(event, self.illegal_input):
-                    self.s = self.s_input.text
-                if self.t_input.handle_events(event, self.illegal_input):
-                    self.t = self.t_input.text
-                if self.r_input.handle_events(event, self.illegal_input):
-                    self.r = self.r_input.text
-                if self.p_input.handle_events(event, self.illegal_input):
-                    self.p = self.p_input.text
+            if not self.exp_name:
+                active = False
+                active = active or self.strategy_type_dropdown.handle_events(event)
 
-                if self.back_button.handle_events(event):
-                    self.manager.go_back()
+                if not active:
+                    self.number_of_players_input.handle_events(event, self.illegal_input)
+                    self.number_of_rounds_input.handle_events(event, self.illegal_input)
+                    self.events_file_name_input.handle_events(event, self.illegal_input)
+                    self.results_file_name_input.handle_events(event, self.illegal_input)
+                    self.start_time_input.handle_events(event, self.illegal_input)
+                    if self.s_input.handle_events(event, self.illegal_input):
+                        self.s = self.s_input.text
+                    if self.t_input.handle_events(event, self.illegal_input):
+                        self.t = self.t_input.text
+                    if self.r_input.handle_events(event, self.illegal_input):
+                        self.r = self.r_input.text
+                    if self.p_input.handle_events(event, self.illegal_input):
+                        self.p = self.p_input.text
 
-                if self.add_button.handle_events(event) and not self.illegal_input:
-                    strategy_type = self.strategy_type_list[self.strategy_type_dropdown.selected]
-                    number_of_players = self.number_of_players_input.get_text()
+                    if self.add_button.handle_events(event) and not self.illegal_input:
+                        strategy_type = self.strategy_type_list[self.strategy_type_dropdown.selected]
+                        number_of_players = self.number_of_players_input.get_text()
 
-                    self.agents.append(strategy_type + " " + str(number_of_players))
-                    self.added.append({"n": number_of_players, "name": strategy_type})
+                        self.agents.append(strategy_type + " " + str(number_of_players))
+                        self.added.append({"n": number_of_players, "name": strategy_type})
 
-                if self.start_button.handle_events(event) and not self.illegal_input:
-                    for item in self.added:
-                        print("make(" + item["n"] + ",player(" + item["name"] + ")),")
-                    items = ','.join(
-                        [f"players({len(self.added)})", f"rounds(0,{self.number_of_rounds_input.get_text()})"])
-                    print("make(1,conductor([" + items + "])),")
-                    print("set(r(" + self.r + ")),")
-                    print("set(s(" + self.s + ")),")
-                    print("set(t(" + self.t + ")),")
-                    print("set(p(" + self.p + ")),")
-                    print("set(starttime(" + self.start_time_input.get_text() + ")),")
-                    print("output(resultsin('" + self.results_file_name_input.get_text() + "')),")
-                    print("output(eventsin('" + self.events_file_name_input.get_text() + "'))")
+                    if self.start_button.handle_events(event) and not self.illegal_input:
+                        with open("AEC2.0/domain/AXELROD_TOUR/config_simulation.pl", "r") as file:
+                            lines = file.readlines()
+                            text = ''.join([i.strip("\t\n ") for i in lines])
 
-                if i := self.scroll.handle_events(event):
-                    self.agents.pop(i - 1)
-                    self.added.pop(i - 1)
+                            exp_found = False
+                            experiment_name = 0
+                            while not exp_found:
+                                experiment_name +=1
+                                if not re.findall(f"experiment\(exp({experiment_name}),\(", text):
+                                    exp_found = True
+                            experiment_name = f"exp{experiment_name}"
+
+                            lines.insert(65, f"experiment({experiment_name},(\n")
+                            lines.insert(66, "set(r(" + self.r + ")),\n")
+                            lines.insert(67, "set(s(" + self.s + ")),\n")
+                            lines.insert(68, "set(t(" + self.t + ")),\n")
+                            lines.insert(69, "set(p(" + self.p + ")),\n")
+                            lines.insert(70, "set(starttime(" + self.start_time_input.get_text() + ")),\n")
+                            items = ','.join(
+                                [f"players({len(self.added)})", f"rounds(0,{self.number_of_rounds_input.get_text()})"])
+                            lines.insert(71, "make(1,conductor([" + items + "])),\n")
+                            i = 72
+                            for item in self.added:
+                                lines.insert(i, "make(" + item["n"] + ",player(" + item["name"] + ")),\n")
+                                i += 1
+                            lines.insert(i, "output(resultsin('" + self.results_file_name_input.get_text() + "')),\n")
+                            lines.insert(i + 1, "output(eventsin('" + self.events_file_name_input.get_text() + "')))).\n")
+
+                            fw = open("AEC2.0/domain/AXELROD_TOUR/config_simulation.pl", "w")
+                            fw.writelines(lines)
+                        self.manager.go_to("SelectExecutionScene", "Axelrod")
+
+                    if i := self.scroll.handle_events(event):
+                        self.agents.pop(i - 1)
+                        self.added.pop(i - 1)
+            else:
+                if self.execute_button.handle_events(event):
+                    prolog = Prolog()
+                    prolog.consult("/Users/denizgorur/PycharmProjects/COGNISIM/AEC2.0/src/loader_AlexrodTournament.pl")
+                    os.chdir("Axelrod")
+                    for _ in prolog.query(f"run({self.exp_name})."):
+                        pass
+                    os.chdir("..")
