@@ -288,7 +288,7 @@ class SelectAxelrodAgentsScene(Scene):
                         self.added.append({"n": number_of_players, "name": strategy_type})
 
                     if self.start_button.handle_events(event) and not self.illegal_input:
-                        with open("AEC2.0/domain/AXELROD_TOUR/config_simulation.pl", "r") as file:
+                        with open("../domain/AXELROD_TOUR/config_simulation.pl", "r") as file:
                             lines = file.readlines()
                             text = ''.join([i.strip("\t\n ") for i in lines])
 
