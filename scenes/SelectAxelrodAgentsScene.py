@@ -316,7 +316,7 @@ class SelectAxelrodAgentsScene(Scene):
                             lines.insert(i, "output(resultsin('" + self.results_file_name_input.get_text() + "')),\n")
                             lines.insert(i + 1, "output(eventsin('" + self.events_file_name_input.get_text() + "')))).\n")
 
-                            fw = open("AEC2.0/domain/AXELROD_TOUR/config_simulation.pl", "w")
+                            fw = open("../domain/AXELROD_TOUR/config_simulation.pl", "w")
                             fw.writelines(lines)
                         self.manager.go_to("SelectExecutionScene", "Axelrod")
 
@@ -326,7 +326,7 @@ class SelectAxelrodAgentsScene(Scene):
             else:
                 if self.execute_button.handle_events(event):
                     prolog = Prolog()
-                    prolog.consult("/Users/denizgorur/PycharmProjects/COGNISIM/AEC2.0/src/loader_AlexrodTournament.pl")
+                    prolog.consult("../src/loader_AxelrodTournament.pl")
                     os.chdir("Axelrod")
                     for _ in prolog.query(f"run({self.exp_name})."):
                         pass
