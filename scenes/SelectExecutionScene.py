@@ -31,9 +31,9 @@ class SelectExecutionScene(Scene):
         if not self.experiments:
             start = 0
             if self.file_type == "Evolutionary":
-                lines = open("AEC2.0/domain/GOSSIP_MODEL/config_simulation.pl", "r").read().rstrip("\n").split()
+                lines = open("../domain/GOSSIP_MODEL/config_simulation.pl", "r").read().rstrip("\n").split()
             elif self.file_type == "Axelrod":
-                lines = open("AEC2.0/domain/AXELROD_TOUR/config_simulation.pl", "r").read().rstrip("\n ").split()
+                lines = open("../domain/AXELROD_TOUR/config_simulation.pl", "r").read().rstrip("\n ").split()
             lines = ''.join(lines)
 
             for exp in re.findall(r"experiment\((\w+),\(", lines):
