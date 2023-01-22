@@ -8,6 +8,7 @@ import pygame
 
 from objects import QuitException
 from objects.SceneManager import SceneManager
+from components.Explanation import Explanation
 
 
 class Screen:
@@ -41,13 +42,11 @@ class Screen:
         self.manager = SceneManager()
         tk = tkinter.Tk()
         tk.withdraw()
-        # self.main_dialog = tkinter.Frame(tk)
-        # self.main_dialog.pack_forget()
         tk.geometry("900x300+0+0")
         tk.protocol("WM_DELETE_WINDOW", self.on_closing)
         tk.configure(background='#333')
         self.manager.tk = tk
-        # self.manager.main_dialog = self.main_dialog
+        self.manager.explanation = Explanation(self.manager)
 
         pygame.init()
         self.__w = width

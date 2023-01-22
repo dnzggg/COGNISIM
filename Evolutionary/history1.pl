@@ -267,6 +267,7 @@ generation1Player4(myrole=recipient,[25,28]).
 generation1Player4(encountercompleted=no,[28,29]).
 happens_at(perform(actuatorgeneration1Player4,inform-done(generation1Player4,[generation1Player2,conductor1],generation1encounter10,gossiping)),30).
 
+new_generation(2).
 
 role_of(generation2Player1,player).
 role_of(generation2Player2,player).

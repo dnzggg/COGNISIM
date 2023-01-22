@@ -174,29 +174,12 @@ class PlayAxelrodTournamentScene(Scene):
                 pygame.gfxdraw.aacircle(screen, int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5), int(self.blobs[agent].radius / 1.5) - 1, color)
                 pygame.draw.circle(screen, color, (int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5)), int(self.blobs[agent].radius / 1.5), 1)
                 pygame.gfxdraw.aacircle(screen, int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 1.5), int(self.blobs[agent].radius / 1.5), color)
-
-                pygame.draw.line(screen, color,
-                                    (int(pos1[0] - self.blobs[agent].radius / 4), int(pos1[1] + self.blobs[agent].radius / 1.1)),
-                                    (int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 0.75)), width=2)
-                pygame.draw.line(screen, color,
-                                 (int(pos1[0]), int(pos1[1] + self.blobs[agent].radius / 0.75)),
-                                 (int(pos1[0] - self.blobs[agent].radius / 4), int(pos1[1] + self.blobs[agent].radius / 0.6)), width=2)
             else:
                 pygame.draw.aaline(screen, color, (pos1[0] - 2, pos1[1]), (pos2[0] - 2, pos2[1]), blend=100)
                 pygame.draw.aaline(screen, color, (pos1[0] - 1, pos1[1]), (pos2[0] - 1, pos2[1]), blend=100)
                 pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
                 pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 1), (pos2[0], pos2[1] - 1), blend=100)
                 pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 2), (pos2[0], pos2[1] - 2), blend=100)
-
-                middle = ((pos1[0] + pos2[0]) / 2), ((pos1[1] + pos2[1]) / 2)
-
-                pygame.draw.line(screen, color,
-                                 (int(middle[0] - self.blobs[agent].radius / 4), int(middle[1] - self.blobs[agent].radius / 2)),
-                                 (int(middle[0] + 1), int(middle[1])), width=2)
-                pygame.draw.line(screen, color,
-                                 (int(middle[0] - self.blobs[agent].radius / 4),
-                                  int(middle[1] + self.blobs[agent].radius / 2)),
-                                 (int(middle[0] + 1), int(middle[1])), width=2)
 
         for ra in render_after:
             self.blobs[ra].render(screen)

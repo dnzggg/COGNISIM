@@ -73,7 +73,7 @@ class PlayEvolutionaryTournamentScene(Scene):
         self.tournament = EvolutionaryTournament(file_name)
         self.run = self.tournament.start()
         self.agents = self.tournament.get_agents()
-        self.conductors = self.tournament.get_conductors()
+        self.conductor = self.tournament.get_conductor()
         self.blobs = dict()
         self.playing_agents = None
 
@@ -159,18 +159,18 @@ class PlayEvolutionaryTournamentScene(Scene):
             color = (255, 255, 255)
             if self.tournament.encounter_type == "Gossip":
                 if self.tournament.gossip:
-                    color = (0, 0, 255)
+                    color = (0, 255, 255)
             else:
                 if self.tournament.cooperate is not None:
                     if self.tournament.cooperate:
                         color = (0, 255, 0)
                     else:
                         color = (255, 0, 0)
-            pygame.draw.aaline(screen, color, (pos1[0] - 2, pos1[1]), (pos2[0] - 2, pos2[1]), blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0] - 1, pos1[1]), (pos2[0] - 1, pos2[1]), blend=100)
-            pygame.draw.aaline(screen, color, pos1, pos2, blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 1), (pos2[0], pos2[1] - 1), blend=100)
-            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 2), (pos2[0], pos2[1] - 2), blend=100)
+            pygame.draw.aaline(screen, color, (pos1[0] - 2, pos1[1]), (pos2[0] - 2, pos2[1]),)
+            pygame.draw.aaline(screen, color, (pos1[0] - 1, pos1[1]), (pos2[0] - 1, pos2[1]), )
+            pygame.draw.aaline(screen, color, pos1, pos2, )
+            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 1), (pos2[0], pos2[1] - 1), )
+            pygame.draw.aaline(screen, color, (pos1[0], pos1[1] - 2), (pos2[0], pos2[1] - 2), )
 
         for ra in render_after:
             self.blobs[ra].render(screen)
@@ -238,14 +238,14 @@ class PlayEvolutionaryTournamentScene(Scene):
     def update(self):
         """Updates the blobs' status, and slider"""
         self.agents = self.tournament.get_agents()
-        self.conductors = self.tournament.get_conductors()
+        self.conductor = self.tournament.get_conductor()
 
         if self.new_generation:
             self.running = self.was_running
             self.new_generation = False
             self.blobs = dict()
         else:
-            length = len(self.agents) + len(self.conductors)
+            length = len(self.agents) + 1
             size = (38, 18)
             shift = 0
             while length > size[0] * size[1]:
@@ -261,7 +261,7 @@ class PlayEvolutionaryTournamentScene(Scene):
             self.min_shift_y = -self.simulation_size_w_padding[1] + 465 + shift * w
 
             if self.blobs:
-                self.blobs[self.conductors[0]].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
+                self.blobs[self.conductor].update(shift=(self.shift_x, self.shift_y), zoom=self.zoom, width=w)
                 for agent in self.agents:
                     if agent == self.tournament.giver_agent:
                         self.blobs[agent].update(giver=True, shift=(self.shift_x, self.shift_y), zoom=self.zoom,
@@ -290,10 +290,9 @@ class PlayEvolutionaryTournamentScene(Scene):
                 self.zoom = zoom
 
                 x = y = -shift
+                self.blobs[self.conductor] = Blob((x, y), w, 20, self.conductor, conductor=True)
+                x += 1
                 for agent in self.agents:
-                    if x == int(size[0] / 2) - shift and y == int(size[1] / 2) - shift:
-                        self.blobs[self.conductors[0]] = Blob((x, y), w, 20, self.conductors[0], conductor=True)
-                        x += 1
                     self.blobs[agent] = Blob((x, y), w, 20, agent, player=True)
                     x += 1
                     if x == size[0] - shift:
@@ -309,7 +308,7 @@ class PlayEvolutionaryTournamentScene(Scene):
         self.info_tab.update(self.tab == self.info_tab.index)
         self.graph_tab.update(self.tab == self.graph_tab.index)
 
-        self.timeline.update(self.tournament.round)
+        self.timeline.update(self.tournament.time_stamp)
 
     def handle_events(self, events):
         """If the start button is pressed, starts the simulation; if the next button is pressed, gets the next round;
@@ -435,4 +434,4 @@ class PlayEvolutionaryTournamentScene(Scene):
                 self.tab = self.graph_tab.index
 
             if info := self.timeline.handle_events(event):
-                self.tournament.round, self.generation = info
+                self.tournament.time_stamp, self.generation = info
