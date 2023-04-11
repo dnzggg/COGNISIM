@@ -27,7 +27,7 @@ class StartScene(Scene):
     def __init__(self):
         Scene.__init__(self)
         pygame.font.init()
-        self.font = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 38)
+        self.font = pygame.font.Font("Images/Montserrat-ExtraBold.ttf", 70)
 
         self.button = Button(font_size=21, w=349, center=True)
         self.background = Background("Images/background.jpg", (0, 0))
@@ -38,14 +38,14 @@ class StartScene(Scene):
 
         self.button.render(screen, "Press any key or click to start")
 
-        title = self.font.render("Cooperative Agents in Multi-agent Systems", True, (124, 124, 124))
+        title = self.font.render("COGNISIM", True, (124, 124, 124))
         shadow = pygame.Surface(title.get_size(), pygame.SRCALPHA)
         shadow.fill((124, 124, 124, 100))
         title.blit(shadow, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-        screen.blit(title, (34, 125))
+        screen.blit(title, (284, 125))
 
-        title = self.font.render("Cooperative Agents in Multi-agent Systems", True, (226, 215, 215))
-        screen.blit(title, (31, 122))
+        title = self.font.render("COGNISIM", True, (226, 215, 215))
+        screen.blit(title, (281, 122))
 
     def update(self):
         """Just to pass the superclass notimplemented error"""

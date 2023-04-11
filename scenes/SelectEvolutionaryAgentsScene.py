@@ -121,7 +121,7 @@ class SelectEvolutionaryAgentsScene(Scene):
         self.start_time_label = self.font2.render("Start Time:", True, (255, 255, 255))
         self.start_time_input = InputBox((833, 365), w=101, h=27, text="10")
 
-        self.evolution_type_list = ["Cultural", "Genetic", "Selection 3", "Selection 4", "Selection 5", "Selection 6"]
+        self.evolution_type_list = ["Cultural", "Genetic"]
         self.evolution_type_dropdown = Dropdown("Evolution Type", w=157, pos=(777, 326), selections=self.evolution_type_list)
 
         self.number_of_generations_label = self.font2.render("Total Number of Generations:", True, (255, 255, 255))
@@ -129,9 +129,9 @@ class SelectEvolutionaryAgentsScene(Scene):
 
         self.image_score_range_label = self.font.render("Image Score Range", True, (255, 255, 255))
         self.min_image_score_range_label = self.font2.render("Minimum Image Score:", True, (255, 255, 255))
-        self.min_image_score_range_input = InputBox((680, 468), w=101, h=27, text="-5", negative=True)
+        self.min_image_score_range_input = InputBox((203, 468), w=101, h=27, text="-5", negative=True)
         self.max_image_score_range_label = self.font2.render("Maximum Image Score:", True, (255, 255, 255))
-        self.max_image_score_range_input = InputBox((680, 507), w=101, h=27, text="5")
+        self.max_image_score_range_input = InputBox((203, 507), w=101, h=27, text="5")
 
         self.start_button = Button(w=80, pos=(854, 499), center=True)
 
@@ -218,17 +218,17 @@ class SelectEvolutionaryAgentsScene(Scene):
         gfxdraw.filled_circle(screen, 934, 411, 2, (247, 95, 23))
         gfxdraw.aacircle(screen, 934, 411, 2, (247, 95, 23))
 
-        screen.blit(self.number_of_generations_label, (16, 431))
-        self.number_of_generations_input.render(screen)
+        # screen.blit(self.number_of_generations_label, (16, 431))
+        # self.number_of_generations_input.render(screen)
 
-        pygame.draw.line(screen, (247, 95, 23), (421, 412), (421, 534), 5)
-        gfxdraw.filled_circle(screen, 421, 534, 2, (247, 95, 23))
-        gfxdraw.aacircle(screen, 421, 534, 2, (247, 95, 23))
+        # pygame.draw.line(screen, (247, 95, 23), (421, 412), (421, 534), 5)
+        # gfxdraw.filled_circle(screen, 421, 534, 2, (247, 95, 23))
+        # gfxdraw.aacircle(screen, 421, 534, 2, (247, 95, 23))
 
-        screen.blit(self.image_score_range_label, (493, 431))
-        screen.blit(self.min_image_score_range_label, (493, 472))
+        screen.blit(self.image_score_range_label, (16, 431))
+        screen.blit(self.min_image_score_range_label, (16, 472))
         self.min_image_score_range_input.render(screen)
-        screen.blit(self.max_image_score_range_label, (493, 511))
+        screen.blit(self.max_image_score_range_label, (16, 511))
         self.max_image_score_range_input.render(screen)
 
         self.start_button.render(screen, "Save")
@@ -349,7 +349,7 @@ class SelectEvolutionaryAgentsScene(Scene):
                                 lines.insert(i, "make(" + item["n"] + ",player(" + items + ")),\n")
                                 i += 1
                             lines.insert(i, "output(resultsin('" + self.results_file_name_input.get_text() + "')),\n")
-                            lines.insert(i + 1, "output(eventsin('" + self.events_file_name_input.get_text() + "')))).")
+                            lines.insert(i + 1, "output(eventsin('" + self.events_file_name_input.get_text() + "')))).\n")
 
                             fw = open("../domain/GOSSIP_MODEL/config_simulation.pl", "w")
                             fw.writelines(lines)

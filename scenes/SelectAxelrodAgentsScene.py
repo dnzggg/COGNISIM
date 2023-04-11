@@ -82,13 +82,13 @@ class SelectAxelrodAgentsScene(Scene):
         self.scroll = HorizontalScroll(items=self.chips, pos=(16, 67))
 
         self.p_label = self.font2.render("Value of P:", True, (255, 255, 255))
-        self.p_input = InputBox((102, 171), w=101, h=27, text="1")
+        self.p_input = InputBox((102, 171), w=101, h=27, text="1", negative=True, decimal=True)
         self.r_label = self.font2.render("Value of R:", True, (255, 255, 255))
-        self.r_input = InputBox((320, 171), w=101, h=27, text="3")
+        self.r_input = InputBox((320, 171), w=101, h=27, text="3", negative=True, decimal=True)
         self.s_label = self.font2.render("Value of S:", True, (255, 255, 255))
-        self.s_input = InputBox((102, 238), w=101, h=27, text="0")
+        self.s_input = InputBox((102, 238), w=101, h=27, text="0", negative=True, decimal=True)
         self.t_label = self.font2.render("Value of T:", True, (255, 255, 255))
-        self.t_input = InputBox((320, 238), w=101, h=27, text="5")
+        self.t_input = InputBox((320, 238), w=101, h=27, text="5", negative=True, decimal=True)
         self.p = 1
         self.r = 3
         self.s = 0
