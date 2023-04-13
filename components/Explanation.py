@@ -51,6 +51,10 @@ class Explanation:
         self.time_stamp = time_stamp
         self.label2.config(text="Time Point: " + str(self.time_stamp))
 
+    def update(self, time_stamp):
+        self.time_stamp = time_stamp
+        self.label2.config(text="Time Point: " + str(self.time_stamp))
+
     def _on_mouse_wheel(self, event):
         self.history.yview_scroll(-1 * int((event.delta / 120)), "units")
 

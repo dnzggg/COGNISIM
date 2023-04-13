@@ -105,7 +105,7 @@ class EvolutionaryTournament:
 
     def perform_line(self, line):
         if m := re.search(
-                r"^happens_at\(perform\(actuator(.*),inform\(\1,\[(.*),.*\],generation1encounter\d+,(\w+)\(.*\)\)\)," +
+                r"^happens_at\(perform\(actuator(.*),inform\(\1,\[(.*),.*],generation1encounter\d+,(\w+)\(.*\)\)\)," +
                 str(self.time_stamp) + r"\)\.$", line):
             if m.group(3) == "gossip":
                 self.encounter_type = "Gossip"
@@ -114,7 +114,7 @@ class EvolutionaryTournament:
                 self.gossiping_agents = [self._agents[index1], self._agents[index2]]
                 self.gossip_encounters += 1
                 self.gossip = True
-            elif m.group(3) == ("defect" or "cooperate"):
+            elif m.group(3) == "defect" or m.group(3) == "cooperate":
                 self.encounter_type = "Giving"
                 index1 = int(re.search(r"^generation\d+Player(\d+)", m.group(1)).group(1)) - 1
                 index2 = int(re.search(r"^generation\d+Player(\d+)", m.group(2)).group(1)) - 1

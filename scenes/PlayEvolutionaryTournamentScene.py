@@ -82,8 +82,10 @@ class PlayEvolutionaryTournamentScene(Scene):
         self.new_generation = False
         self.total_generations = self.tournament.total_generations
         self.total_rounds = self.tournament.total_rounds
-        self.total_giving_encounters = self.tournament.total_giving_encounters
-        self.total_gossip_encounters = self.tournament.total_gossip_encounters
+        # self.total_giving_encounters = self.tournament.total_giving_encounters
+        # self.total_gossip_encounters = self.tournament.total_gossip_encounters
+        self.total_giving_encounters = self.tournament.total_rounds
+        self.total_gossip_encounters = self.tournament.total_rounds
 
         self.UPDATE = pygame.USEREVENT + 1
         self.speed = 99
@@ -128,7 +130,7 @@ class PlayEvolutionaryTournamentScene(Scene):
         self.simulation_size_w_padding = None
         self.simulation_size_wo_padding = None
 
-        self.timeline = Timeline(rounds=self.total_rounds)
+        # self.timeline = Timeline(rounds=self.total_rounds)
 
     def render(self, screen):
         """Renders the blobs, buttons, radio buttons, labels and lines"""
@@ -233,12 +235,14 @@ class PlayEvolutionaryTournamentScene(Scene):
             zoom_label = self.font3.render(f"Zoom: {self.zoom}%", True, (255, 255, 255))
             screen.blit(zoom_label, (840, 97))
 
-        self.timeline.render(screen)
+        # self.timeline.render(screen)
 
     def update(self):
         """Updates the blobs' status, and slider"""
         self.agents = self.tournament.get_agents()
         self.conductor = self.tournament.get_conductor()
+
+        self.manager.explanation.update(self.tournament.time_stamp)
 
         if self.new_generation:
             self.running = self.was_running
@@ -308,7 +312,7 @@ class PlayEvolutionaryTournamentScene(Scene):
         self.info_tab.update(self.tab == self.info_tab.index)
         self.graph_tab.update(self.tab == self.graph_tab.index)
 
-        self.timeline.update(self.tournament.time_stamp)
+        # self.timeline.update(self.tournament.time_stamp)
 
     def handle_events(self, events):
         """If the start button is pressed, starts the simulation; if the next button is pressed, gets the next round;
@@ -433,5 +437,5 @@ class PlayEvolutionaryTournamentScene(Scene):
             if self.graph_tab.handle_events(event):
                 self.tab = self.graph_tab.index
 
-            if info := self.timeline.handle_events(event):
-                self.tournament.time_stamp, self.generation = info
+            # if info := self.timeline.handle_events(event):
+            #     self.tournament.time_stamp, self.generation = info

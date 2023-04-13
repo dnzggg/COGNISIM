@@ -145,7 +145,7 @@ happens_at(in(conductor1,percept(perform(actuatorgeneration1Player3,inform-done(
 happens_at(perform(actuatorconductor1,request(conductor1,[generation1Player2,generation1Player4],giving_encounter(generation1encounter3,generation1Player2,generation1Player4))),7).
 happens_at(in(generation1Player2,percept(perform(actuatorconductor1,request(conductor1,[generation1Player2,generation1Player4],giving_encounter(generation1encounter3,generation1Player2,generation1Player4))))),7).
 happens_at(in(generation1Player4,percept(perform(actuatorconductor1,request(conductor1,[generation1Player2,generation1Player4],giving_encounter(generation1encounter3,generation1Player2,generation1Player4))))),7).
-happens_at(perform(actuatorgeneration1Player2,inform(generation1Player2,_14616,generation1encounter3,cooperate(generation1Player4))),8).
+happens_at(perform(actuatorgeneration1Player2,inform(generation1Player2,[generation1Player4,conductor1],generation1encounter3,cooperate(generation1Player4))),8).
 happens_at(in(conductor1,percept(perform(actuatorgeneration1Player2,inform(generation1Player2,_14584,generation1encounter3,cooperate(generation1Player4))))),8).
 happens_at(in(generation1Player2,percept(perform(actuatorgeneration1Player2,inform(generation1Player2,_14542,generation1encounter3,cooperate(generation1Player4))))),8).
 happens_at(in(generation1Player3,percept(perform(actuatorgeneration1Player2,inform(generation1Player2,_14500,generation1encounter3,cooperate(generation1Player4))))),8).

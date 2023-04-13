@@ -8,7 +8,10 @@ from objects import Blob, Button, Scene, DropdownItem, Slider
 
 from sys import platform
 
-matplotlib.use('Qt5Agg')
+if platform == "linux":
+    matplotlib.use('TkAgg')
+else:
+    matplotlib.use('qt5agg')
 from matplotlib import pyplot as plt
 
 
@@ -102,8 +105,8 @@ class PlayAxelrodTournamentScene(Scene):
         self.start_stop_button = Button(w=80, pos=(237, 39), center=True)
         self.next_button = Button(w=80, pos=(341, 39), center=True)
         self.show_statistics_button = Button(w=275, pos=(16, 39), center=True)
-        self.show_statistics_button2 = Button(w=275, pos=(216, 39), center=True)
-        self.show_statistics_button3 = Button(w=275, pos=(416, 39), center=True)
+        self.show_statistics_button2 = Button(w=275, pos=(306, 39), center=True)
+        self.show_statistics_button3 = Button(w=275, pos=(16, 39), center=True)
 
         self.speed_label = self.font.render("Speed", True, (255, 255, 255))
         self.speed_outside_im = pygame.image.load("Images/speedometer_outside.png")
@@ -220,8 +223,8 @@ class PlayAxelrodTournamentScene(Scene):
                 (255, 255, 255))
             screen.blit(cooperation_label, (562, 46))
         elif self.tab == 3:
-            self.show_statistics_button.render(screen, "Player 1 statistics")
-            self.show_statistics_button2.render(screen, "Player 2 statistics")
+            # self.show_statistics_button.render(screen, "Player 1 statistics")
+            # self.show_statistics_button2.render(screen, "Player 2 statistics")
             self.show_statistics_button3.render(screen, "Overall statistics")
 
         pygame.draw.line(screen, (247, 95, 23), (0, 85), (100000, 85), 2)
@@ -236,6 +239,8 @@ class PlayAxelrodTournamentScene(Scene):
         """Updates the blobs' status, and slider"""
         self.agents = self.tournament.get_agents()
         self.conductor = self.tournament.get_conductor()
+
+        self.manager.explanation.update(self.tournament.time_stamp)
 
         if self.new_generation:
             self.running = self.was_running
@@ -303,7 +308,13 @@ class PlayAxelrodTournamentScene(Scene):
         if self.belief != belief:
             for graph in self.graphs:
                 if self.graphs[graph]:
+                    x = graph.get_xlabel()
+                    y = graph.get_ylabel()
+                    t = graph.title
                     graph.clear()
+                    graph.title = t
+                    graph.set_xlabel(x)
+                    graph.set_ylabel(y)
                     graph.plot(belief["time"], belief["agents"][self.graphs[graph]])
             # if self.f1:
             #     self.af1.clear()
